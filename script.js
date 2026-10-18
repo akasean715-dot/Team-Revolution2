@@ -1637,7 +1637,7 @@ async function loadCloudData() {
         openSession.duration=minutes>=60?`${Math.floor(minutes/60)}h ${minutes%60}m`:`${minutes}m`;
         openSession.status='Present';
         save();
-        renderCurrentPage();
+        renderAttendance();
         const newResult=document.querySelector('#teamrev-qr-result');
         if(newResult){newResult.textContent=`CHECK-OUT SUCCESSFUL — ${member.name} (${member.id}) left at ${formatTime(time)}. Workout: ${openSession.duration}.`;newResult.style.color='#35d39b';}
         const input=document.querySelector('#teamrev-member-code');if(input)input.value='';
@@ -1647,7 +1647,7 @@ async function loadCloudData() {
       if(expiredByDate || String(member.status||'').toLowerCase()==='expired'){
         member.status='Expired';
         save();
-        renderCurrentPage();
+        renderAttendance();
         return showResult(`ACCESS DENIED — ${member.name}'s membership has expired${member.expiry?' on '+fmtDate(member.expiry):''}. Renew the membership before check-in.`);
       }
       // A completed session exists today: do not accidentally create a second visit from a duplicate scan.
@@ -1655,7 +1655,7 @@ async function loadCloudData() {
       const record={id:'AT-'+Date.now(),memberId:member.id,member:member.name,date:isoToday,checkIn:time,checkOut:'',duration:'—',plan:member.plan||'Membership',status:'Present'};
       data.attendance.unshift(record);
       save();
-      renderCurrentPage();
+      renderAttendance();
       const newResult=document.querySelector('#teamrev-qr-result');
       if(newResult){newResult.textContent=`CHECK-IN SUCCESSFUL — ${member.name} (${member.id}) arrived at ${formatTime(time)}. Scan again when they leave.`;newResult.style.color='#35d39b';}
       const input=document.querySelector('#teamrev-member-code');if(input)input.value='';
