@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attendance — TEAM REVOLUTION Gym Management</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="firebase-config.js"></script>
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <a class="brand" href="index.html">
+                <img src="assets/tribal-logo-192.png" alt="Team Revolution" class="tca-logo">
+                <span><strong>TEAM REVOLUTION</strong><small>GYM MANAGEMENT</small></span>
+            </a>
+
+            <nav class="sidebar-nav">
+                <span class="nav-label">MAIN</span>
+                <a href="index.html">Dashboard</a>
+<a href="members.html">Members</a>
+<a href="memberships.html">Memberships</a>
+<a href="attendance.html" class="active">Attendance</a>
+<a href="bookings.html">Bookings</a>
+<a href="trainers.html">Trainers</a>
+<a href="finance.html">Income & Expenses</a>
+<a href="reports.html">Reports</a>
+<a href="settings.html">Settings</a>
+            </nav>
+
+            <div class="sidebar-promo">
+                <span>STRONGER</span>
+                <strong>Healthier.<br>Happier.</strong>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div class="search-box"><span>⌕</span><input type="search" placeholder="Search members, bookings, or anything..."></div>
+                <div class="topbar-user"><button class="icon-btn" aria-label="Notifications">♧</button><div class="user-avatar">A</div><div><strong>Admin</strong><small>Gym Owner</small></div><span>⌄</span></div>
+            </header>
+
+            <div class="content">
+                
+        <section class="page-header">
+            <div><span class="eyebrow">MEMBERS</span><h1>Attendance</h1><p>Track check-ins, visits and attendance trends.</p></div>
+            <button class="btn btn-secondary">Export Attendance</button>
+        </section>
+        <section class="stats-grid compact">
+            <article class="stat-card"><span>Today's Check-ins</span><strong>84</strong><small>↑ 9% vs yesterday</small></article>
+            <article class="stat-card"><span>Average Daily</span><strong>71</strong><small>Last 30 days</small></article>
+            <article class="stat-card"><span>Peak Hour</span><strong>6–8 PM</strong><small>32% of visits</small></article>
+            <article class="stat-card"><span>Absent Members</span><strong>46</strong><small>Not checked in today</small></article>
+        </section>
+        <article class="panel"><div class="panel-heading"><div><span class="eyebrow">TODAY</span><h2>Member Check-ins</h2></div><input type="search" placeholder="Search member..."></div>
+            <div class="table-wrap"><table><thead><tr><th>Member</th><th>Check-in</th><th>Check-out</th><th>Duration</th><th>Plan</th><th>Status</th></tr></thead>
+            <tbody><tr><td><b>Rahul Sharma</b></td><td>06:42 AM</td><td>08:10 AM</td><td>1h 28m</td><td>Premium</td><td><span class="badge success">Present</span></td></tr>
+            <tr><td><b>Ananya Singh</b></td><td>07:15 AM</td><td>08:30 AM</td><td>1h 15m</td><td>Monthly</td><td><span class="badge success">Present</span></td></tr>
+            <tr><td><b>Arjun Das</b></td><td>08:02 AM</td><td>09:12 AM</td><td>1h 10m</td><td>Basic</td><td><span class="badge success">Present</span></td></tr></tbody></table></div>
+        </article>
+        <article class="panel"><div class="panel-heading"><h2>Attendance Trend</h2><select><option>Last 30 Days</option><option>Last 6 Months</option></select></div><div class="chart-placeholder tall">Attendance trend chart</div></article>
+    
+            </div>
+        </main>
+    </div>
+    <script src="firebase-connection.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

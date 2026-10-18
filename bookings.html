@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookings — TEAM REVOLUTION Gym Management</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="firebase-config.js"></script>
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <a class="brand tca-brand" href="index.html">
+                <img src="assets/tribal-logo-192.png" alt="Team Revolution" class="tca-logo">
+                <span class="tca-brand-text">
+                    <strong>
+                        <span>TEAM</span>
+                        <span>REVOLUTION</span>
+                        <span>MMA</span>
+                    </strong>
+                    <small>GYM MANAGEMENT</small>
+                </span>
+            </a>
+
+            <nav class="sidebar-nav">
+                <span class="nav-label">MAIN</span>
+                <a href="index.html">Dashboard</a>
+                <a href="members.html">Members</a>
+                <a href="memberships.html">Memberships</a>
+                <a href="attendance.html">Attendance</a>
+                <a href="bookings.html" class="active">Bookings</a>
+                <a href="trainers.html">Trainers</a>
+                <a href="finance.html">Income &amp; Expenses</a>
+                <a href="reports.html">Reports</a>
+                <a href="settings.html">Settings</a>
+            </nav>
+
+            <div class="sidebar-promo">
+                <span>STRONGER</span>
+                <strong>Healthier.<br>Happier.</strong>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div class="search-box"><span>⌕</span><input type="search" placeholder="Search members, bookings, or anything..."></div>
+                <div class="topbar-user"><button class="icon-btn" aria-label="Notifications">♧</button><div class="user-avatar">A</div><div><strong>Admin</strong><small>Gym Owner</small></div><span>⌄</span></div>
+            </header>
+
+            <div class="content">
+                <section class="page-header">
+                    <div><span class="eyebrow">OPERATIONS</span><h1>Bookings</h1><p>Manage personal training, classes and appointments.</p></div>
+                    <button class="btn btn-primary">+ Add Booking</button>
+                </section>
+
+                <article class="panel calendar-panel" data-booking-calendar>
+                    <div class="panel-heading">
+                        <div class="booking-calendar-nav">
+                            <button class="btn btn-small" type="button" data-booking-month="-1" aria-label="Previous month">←</button>
+                            <b data-calendar-title>September 2026</b>
+                            <button class="btn btn-small" type="button" data-booking-month="1" aria-label="Next month">→</button>
+                        </div>
+                        <div class="page-actions">
+                            <button class="btn btn-small active" type="button" data-booking-view="calendar">Calendar</button>
+                            <button class="btn btn-small" type="button" data-booking-view="list">List</button>
+                        </div>
+                    </div>
+                    <div class="calendar-grid" data-calendar-grid></div>
+                    <div class="booking-list-view" data-booking-list-view hidden></div>
+                </article>
+
+                <section class="two-column">
+                    <article class="panel">
+                        <div class="panel-heading">
+                            <div>
+                                <span class="eyebrow" data-schedule-kicker>TODAY</span>
+                                <h2 data-schedule-title>Today's Schedule</h2>
+                            </div>
+                        </div>
+                        <div data-schedule-body></div>
+                    </article>
+
+                    <article class="panel">
+                        <div class="panel-heading">
+                            <div>
+                                <span class="eyebrow">THIS MONTH</span>
+                                <h2>Booking Types</h2>
+                            </div>
+                        </div>
+                        <div class="booking-types-chart" data-booking-types-chart></div>
+                    </article>
+                </section>
+            </div>
+        </main>
+    </div>
+    <script src="firebase-connection.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

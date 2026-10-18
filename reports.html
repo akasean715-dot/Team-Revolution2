@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports — TEAM REVOLUTION Gym Management</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="firebase-config.js"></script>
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <a class="brand" href="index.html">
+                <img src="assets/tribal-logo-192.png" alt="Team Revolution" class="tca-logo">
+                <span><strong>TEAM REVOLUTION</strong><small>GYM MANAGEMENT</small></span>
+            </a>
+
+            <nav class="sidebar-nav">
+                <span class="nav-label">MAIN</span>
+                <a href="index.html">Dashboard</a>
+<a href="members.html">Members</a>
+<a href="memberships.html">Memberships</a>
+<a href="attendance.html">Attendance</a>
+<a href="bookings.html">Bookings</a>
+<a href="trainers.html">Trainers</a>
+<a href="finance.html">Income & Expenses</a>
+<a href="reports.html" class="active">Reports</a>
+<a href="settings.html">Settings</a>
+            </nav>
+
+            <div class="sidebar-promo">
+                <span>STRONGER</span>
+                <strong>Healthier.<br>Happier.</strong>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div class="search-box"><span>⌕</span><input type="search" placeholder="Search members, bookings, or anything..."></div>
+                <div class="topbar-user"><button class="icon-btn" aria-label="Notifications">♧</button><div class="user-avatar">A</div><div><strong>Admin</strong><small>Gym Owner</small></div><span>⌄</span></div>
+            </header>
+
+            <div class="content">
+                
+        <section class="page-header">
+            <div><span class="eyebrow">ANALYTICS</span><h1>Reports</h1><p>Turn your gym data into clear, useful reports.</p></div>
+            <button class="btn btn-primary">Export Report</button>
+        </section>
+        <section class="report-grid">
+            <a class="report-card" href="#"><span>FINANCE</span><h2>Profit & Loss</h2><p>Income, expenses and net profit for any period.</p><b>Open Report →</b></a>
+            <a class="report-card" href="#"><span>MEMBERS</span><h2>Membership Sales</h2><p>New memberships, renewals and plan performance.</p><b>Open Report →</b></a>
+            <a class="report-card" href="#"><span>MEMBERS</span><h2>Expiring Memberships</h2><p>Members whose plans are about to expire.</p><b>Open Report →</b></a>
+            <a class="report-card" href="#"><span>ATTENDANCE</span><h2>Attendance Report</h2><p>Visits, trends and member attendance history.</p><b>Open Report →</b></a>
+            <a class="report-card" href="#"><span>OPERATIONS</span><h2>Booking Report</h2><p>Classes, PT sessions and booking performance.</p><b>Open Report →</b></a>
+            <a class="report-card" href="#"><span>TRAINERS</span><h2>Trainer Performance</h2><p>Sessions, members and revenue by trainer.</p><b>Open Report →</b></a>
+        </section>
+        <article class="panel"><div class="panel-heading"><div><span class="eyebrow">OVERVIEW</span><h2>Business Performance</h2></div><select><option>September 2026</option><option>August 2026</option></select></div><div class="chart-placeholder tall">Business analytics chart</div></article>
+    
+            </div>
+        </main>
+    </div>
+    <script src="firebase-connection.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

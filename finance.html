@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Income & Expenses — TEAM REVOLUTION Gym Management</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="firebase-config.js"></script>
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <a class="brand" href="index.html">
+                <img src="assets/tribal-logo-192.png" alt="Team Revolution" class="tca-logo">
+                <span><strong>TEAM REVOLUTION</strong><small>GYM MANAGEMENT</small></span>
+            </a>
+
+            <nav class="sidebar-nav">
+                <span class="nav-label">MAIN</span>
+                <a href="index.html">Dashboard</a>
+<a href="members.html">Members</a>
+<a href="memberships.html">Memberships</a>
+<a href="attendance.html">Attendance</a>
+<a href="bookings.html">Bookings</a>
+<a href="trainers.html">Trainers</a>
+<a href="finance.html" class="active">Income & Expenses</a>
+<a href="reports.html">Reports</a>
+<a href="settings.html">Settings</a>
+            </nav>
+
+            <div class="sidebar-promo">
+                <span>STRONGER</span>
+                <strong>Healthier.<br>Happier.</strong>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div class="search-box"><span>⌕</span><input type="search" placeholder="Search members, bookings, or anything..."></div>
+                <div class="topbar-user"><button class="icon-btn" aria-label="Notifications">♧</button><div class="user-avatar">A</div><div><strong>Admin</strong><small>Gym Owner</small></div><span>⌄</span></div>
+            </header>
+
+            <div class="content">
+                
+        <section class="page-header">
+            <div><span class="eyebrow">FINANCE</span><h1>Income & Expenses</h1><p>Track your gym's money in, money out and overall profitability.</p></div>
+            <div class="page-actions"><button class="btn btn-secondary">Export</button><button class="btn btn-primary">+ Add Transaction</button></div>
+        </section>
+        <section class="stats-grid">
+            <article class="stat-card"><span>Total Income</span><strong>₹4,82,500</strong><small class="income">This month</small></article>
+            <article class="stat-card"><span>Total Expenses</span><strong>₹1,26,800</strong><small class="expense">This month</small></article>
+            <article class="stat-card"><span>Net Profit</span><strong>₹3,55,700</strong><small>74% margin</small></article>
+            <article class="stat-card"><span>Pending Payments</span><strong>₹24,500</strong><small>11 members</small></article>
+        </section>
+        <section class="two-column">
+            <article class="panel"><div class="panel-heading"><div><span class="eyebrow">INCOME</span><h2>Income Breakdown</h2></div><button class="btn btn-small">+ Income</button></div>
+                <div class="finance-row"><span>Membership Fees</span><b>₹2,82,000</b><span>58%</span></div>
+                <div class="finance-row"><span>Personal Training</span><b>₹1,20,500</b><span>25%</span></div>
+                <div class="finance-row"><span>Classes</span><b>₹45,000</b><span>9%</span></div>
+                <div class="finance-row"><span>Supplements</span><b>₹22,000</b><span>5%</span></div>
+                <div class="finance-row"><span>Other</span><b>₹13,000</b><span>3%</span></div>
+            </article>
+            <article class="panel"><div class="panel-heading"><div><span class="eyebrow">EXPENSES</span><h2>Expense Breakdown</h2></div><button class="btn btn-small">+ Expense</button></div>
+                <div class="finance-row"><span>Rent</span><b>₹40,000</b><span>32%</span></div>
+                <div class="finance-row"><span>Electricity</span><b>₹24,000</b><span>19%</span></div>
+                <div class="finance-row"><span>Salaries</span><b>₹42,000</b><span>33%</span></div>
+                <div class="finance-row"><span>Equipment</span><b>₹12,500</b><span>10%</span></div>
+                <div class="finance-row"><span>Maintenance</span><b>₹8,300</b><span>6%</span></div>
+            </article>
+        </section>
+        <article class="panel table-panel"><div class="panel-heading"><div><span class="eyebrow">LEDGER</span><h2>Recent Transactions</h2></div></div>
+            <div class="table-wrap"><table><thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Type</th><th>Amount</th><th>Status</th><th>Actions</th></tr></thead>
+            <tbody><tr><td>19 Sep 2026</td><td>Rahul Sharma — Membership</td><td>Membership</td><td><span class="badge success">Income</span></td><td class="income">+₹2,500</td><td>Paid</td></tr>
+            <tr><td>18 Sep 2026</td><td>Electricity Bill</td><td>Utilities</td><td><span class="badge danger">Expense</span></td><td class="expense">-₹8,400</td><td>Paid</td></tr>
+            <tr><td>17 Sep 2026</td><td>Anita Singh — PT</td><td>Training</td><td><span class="badge success">Income</span></td><td class="income">+₹6,000</td><td>Paid</td></tr></tbody></table></div>
+        </article>
+    
+            </div>
+        </main>
+    </div>
+    <script src="firebase-connection.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

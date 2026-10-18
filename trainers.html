@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trainers — TEAM REVOLUTION Gym Management</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="firebase-config.js"></script>
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <a class="brand tca-brand" href="index.html">
+    <img
+        src="assets/tribal-logo-192.png"
+        alt="Team Revolution"
+        class="tca-logo"
+    >
+
+    <span class="tca-brand-text">
+        <strong>
+            <span>TEAM</span>
+            <span>REVOLUTION</span>
+            <span>MMA</span>
+        </strong>
+        <small>GYM MANAGEMENT</small>
+    </span>
+</a>
+
+            <nav class="sidebar-nav">
+                <span class="nav-label">MAIN</span>
+                <a href="index.html">Dashboard</a>
+<a href="members.html">Members</a>
+<a href="memberships.html">Memberships</a>
+<a href="attendance.html">Attendance</a>
+<a href="bookings.html">Bookings</a>
+<a href="trainers.html" class="active">Trainers</a>
+<a href="finance.html">Income & Expenses</a>
+<a href="reports.html">Reports</a>
+<a href="settings.html">Settings</a>
+            </nav>
+
+            <div class="sidebar-promo">
+                <span>STRONGER</span>
+                <strong>Healthier.<br>Happier.</strong>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div class="search-box"><span>⌕</span><input type="search" placeholder="Search members, bookings, or anything..."></div>
+                <div class="topbar-user"><button class="icon-btn" aria-label="Notifications">♧</button><div class="user-avatar">A</div><div><strong>Admin</strong><small>Gym Owner</small></div><span>⌄</span></div>
+            </header>
+
+            <div class="content">
+                
+        <section class="page-header">
+            <div><span class="eyebrow">OPERATIONS</span><h1>Trainers</h1><p>Manage trainers, schedules, sessions and performance.</p></div>
+            <button class="btn btn-primary">+ Add Trainer</button>
+        </section>
+        <section class="trainer-grid"></section>
+        <article class="panel"><div class="panel-heading"><h2>Trainer Performance</h2></div><div class="chart-placeholder tall">Trainer performance chart</div></article>
+    
+            </div>
+        </main>
+    </div>
+    <script src="firebase-connection.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

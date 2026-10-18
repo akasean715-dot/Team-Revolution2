@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard — TEAM REVOLUTION Gym Management</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="firebase-config.js"></script>
+    
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#080808">
+</head>
+<body>
+
+    <!-- Temporary demo mode: login gate disabled at the client request. -->
+    <div class="app-shell">
+        <aside class="sidebar">
+            <a class="brand tca-brand" href="index.html">
+    <img
+        src="assets/tribal-logo-192.png"
+        alt="Team Revolution"
+        class="tca-logo"
+    >
+
+    <span class="tca-brand-text">
+        <strong>
+            <span>TEAM</span>
+            <span>REVOLUTION</span>
+            <span>MMA</span>
+        </strong>
+        <small>GYM MANAGEMENT</small>
+    </span>
+</a>
+
+            <nav class="sidebar-nav">
+                <span class="nav-label">MAIN</span>
+                <a href="index.html" class="active">Dashboard</a>
+<a href="members.html">Members</a>
+<a href="memberships.html">Memberships</a>
+<a href="attendance.html">Attendance</a>
+<a href="bookings.html">Bookings</a>
+<a href="trainers.html">Trainers</a>
+<a href="finance.html">Income & Expenses</a>
+<a href="reports.html">Reports</a>
+<a href="settings.html">Settings</a>
+            </nav>
+
+            <div class="sidebar-promo">
+                <span>STRONGER</span>
+                <strong>Healthier.<br>Happier.</strong>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div class="search-box"><span>⌕</span><input type="search" placeholder="Search members, bookings, or anything..."></div>
+                <div class="topbar-user"><button class="icon-btn" aria-label="Notifications">♧</button><div class="user-avatar">A</div><div><strong>Admin</strong><small>Gym Owner</small></div><span>⌄</span></div>
+            </header>
+
+            <div class="content">
+                
+        <section class="page-header">
+            <div>
+                <span class="eyebrow">OVERVIEW</span>
+                <h1>Dashboard</h1>
+                <p>Here’s what’s happening at your gym today.</p>
+            </div>
+            <div class="page-actions">
+                <button class="btn btn-secondary">Export Report</button>
+                
+            </div>
+        </section>
+
+        <section class="stats-grid">
+            <article class="stat-card"><span>Total Members</span><strong>248</strong><small>↑ 12% from last month</small></article>
+            <article class="stat-card"><span>Active Memberships</span><strong>193</strong><small>↑ 8% from last month</small></article>
+            <article class="stat-card"><span>Monthly Income</span><strong>₹4,82,500</strong><small>↑ 15% from last month</small></article>
+            <article class="stat-card"><span>Monthly Expenses</span><strong>₹1,26,800</strong><small>↑ 7% from last month</small></article>
+            <article class="stat-card"><span>Net Profit</span><strong>₹3,55,700</strong><small>↑ 18% from last month</small></article>
+            <article class="stat-card"><span>Expiring Soon</span><strong>17</strong><small>Within the next 7 days</small></article>
+        </section>
+
+        <section class="dashboard-grid">
+            <article class="panel chart-panel">
+                <div class="panel-heading"><div><span class="eyebrow">FINANCE</span><h2>Income vs Expenses</h2></div><select><option>This Month</option><option>Last 3 Months</option><option>Last 6 Months</option></select></div>
+                <div class="chart-placeholder">Income & Expense Chart</div>
+            </article>
+
+            <article class="panel">
+                <div class="panel-heading"><div><span class="eyebrow">MEMBERS</span><h2>Membership Status</h2></div></div>
+                <div class="donut-placeholder">248<br><small>Total Members</small></div>
+                <ul class="legend-list">
+                    <li><span class="dot active"></span>Active <b>193</b></li>
+                    <li><span class="dot warning"></span>Expiring Soon <b>17</b></li>
+                    <li><span class="dot danger"></span>Expired <b>21</b></li>
+                    <li><span class="dot muted"></span>Pending Payment <b>17</b></li>
+                </ul>
+            </article>
+
+            <article class="panel">
+                <div class="panel-heading"><div><span class="eyebrow">TODAY</span><h2>Bookings</h2></div><a href="bookings.html">View All</a></div>
+                <div class="list-row"><span>10:00 AM</span><div><b>Personal Training</b><small>Rahul Sharma</small></div><span class="badge success">Confirmed</span></div>
+                <div class="list-row"><span>11:30 AM</span><div><b>Yoga Class</b><small>12 members</small></div><span class="badge success">Confirmed</span></div>
+                <div class="list-row"><span>5:00 PM</span><div><b>Zumba Class</b><small>18 members</small></div><span class="badge success">Confirmed</span></div>
+            </article>
+
+            <article class="panel">
+                <div class="panel-heading"><div><span class="eyebrow">FINANCE</span><h2>Recent Transactions</h2></div><a href="finance.html">View All</a></div>
+                <div class="list-row"><div><b>Rahul Sharma</b><small>Monthly Membership</small></div><strong class="income">+₹2,500</strong></div>
+                <div class="list-row"><div><b>Anita Singh</b><small>Personal Training</small></div><strong class="income">+₹6,000</strong></div>
+                <div class="list-row"><div><b>Electricity</b><small>Utility Expense</small></div><strong class="expense">-₹8,400</strong></div>
+                <div class="list-row"><div><b>Equipment Repair</b><small>Maintenance</small></div><strong class="expense">-₹3,200</strong></div>
+            </article>
+
+            <article class="panel quick-actions">
+                <div class="panel-heading"><div><span class="eyebrow">SHORTCUTS</span><h2>Quick Actions</h2></div></div>
+                <a href="members.html" class="action-card">Add Member <span>→</span></a>
+                <a href="bookings.html" class="action-card">Create Booking <span>→</span></a>
+                <a href="finance.html" class="action-card">Record Payment <span>→</span></a>
+                <a href="finance.html" class="action-card">Add Expense <span>→</span></a>
+            </article>
+        </section>
+    
+            </div>
+        </main>
+    </div>
+
+
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+
+    import {
+    getFirestore,
+    doc,
+    setDoc,
+    getDoc,
+    onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+    import { getAuth } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+    import {
+        getStorage,
+        ref,
+        uploadString
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
+
+    const firebaseConfig = window.TEAM_REVOLUTION_FIREBASE_CONFIG;
+
+    const app = initializeApp(firebaseConfig);
+
+    const db = getFirestore(app);
+    const storage = getStorage(app);
+    const auth = getAuth(app);
+
+   window.firebaseApp = app;
+   window.firebaseDB = db;
+   window.firebaseStorage = storage;
+   window.firebaseAuth = auth;
+   window.TCAFirebaseReady = Promise.resolve({
+    app,
+    auth,
+    db,
+    storage,
+
+    sdk: {
+        firestore: {
+            doc,
+            setDoc,
+            getDoc,
+            onSnapshot
+        }
+    },
+
+    config: firebaseConfig
+});
+
+    console.log("Firebase connected successfully!");
+    console.log("🔥 Firebase Storage connected successfully!");
+
+    // Temporary demo mode: skip Firebase sign-in and show the dashboard directly.
+    // Re-enable authentication and add server-side access rules before production use.
+    document.querySelector(".app-shell").style.display = "flex";
+
+    // Firestore gym data backup
+    const localGymData = localStorage.getItem("team_revolution_gym_data_v1");
+
+    if (localGymData) {
+        try {
+            const gymData = JSON.parse(localGymData);
+
+            setDoc(doc(db, "gymData", "backup"), {
+                data: gymData,
+                backedUpAt: new Date().toISOString()
+            })
+            .then(() => {
+                console.log("🔥 Gym data backup successful!");
+            })
+            .catch((error) => {
+                console.error("❌ Gym data backup failed:", error);
+            });
+
+        } catch (error) {
+            console.error("❌ Could not read existing gym data:", error);
+        }
+        } else {
+        console.log("ℹ️ No existing local gym data found.");
+    }
+
+    // Load the main application only after Firebase is ready
+    const appScript = document.createElement("script");
+    appScript.src = "script.js";
+    document.body.appendChild(appScript);
+
+</script>
+<script>
+  if ("serviceWorker" in navigator) {
+        // Load the main application only after Firebase is ready
+
+    
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("./service-worker.js")
+        .then(() => {
+          console.log("TEAM REVOLUTION Service Worker registered");
+        })
+        .catch(error => {
+          console.error("Service Worker registration failed:", error);
+        });
+    });
+  }
+</script>
+</body>
+</html>

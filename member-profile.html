@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Member Profile — TEAM REVOLUTION Gym Management</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="firebase-config.js"></script>
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <a class="brand" href="index.html">
+                <img src="assets/tribal-logo-192.png" alt="Team Revolution" class="tca-logo">
+                <span><strong>TEAM REVOLUTION</strong><small>GYM MANAGEMENT</small></span>
+            </a>
+
+            <nav class="sidebar-nav">
+                <span class="nav-label">MAIN</span>
+                <a href="index.html">Dashboard</a>
+<a href="members.html">Members</a>
+<a href="memberships.html">Memberships</a>
+<a href="attendance.html">Attendance</a>
+<a href="bookings.html">Bookings</a>
+<a href="trainers.html">Trainers</a>
+<a href="finance.html">Income & Expenses</a>
+<a href="reports.html">Reports</a>
+<a href="settings.html">Settings</a>
+            </nav>
+
+            <div class="sidebar-promo">
+                <span>STRONGER</span>
+                <strong>Healthier.<br>Happier.</strong>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div class="search-box"><span>⌕</span><input type="search" placeholder="Search members, bookings, or anything..."></div>
+                <div class="topbar-user"><button class="icon-btn" aria-label="Notifications">♧</button><div class="user-avatar">A</div><div><strong>Admin</strong><small>Gym Owner</small></div><span>⌄</span></div>
+            </header>
+
+            <div class="content">
+                
+        <section class="page-header">
+            <div><span class="eyebrow">MEMBER PROFILE</span><h1>Ananya Singh</h1><p>Member ID: MEM-0013</p></div>
+            <div class="page-actions"><button class="btn btn-secondary">Edit Member</button><button class="btn btn-primary">Record Payment</button></div>
+        </section>
+        <section class="profile-grid">
+            <article class="panel profile-card"><div class="avatar large">AS</div><h2>Ananya Singh</h2><span class="badge success">Active Member</span><p>+91 91234 56780</p><p>ananya@gmail.com</p></article>
+            <article class="panel"><div class="panel-heading"><h2>Membership Details</h2></div><div class="detail-grid"><span>Plan<b>Monthly</b></span><span>Start Date<b>15 Aug 2026</b></span><span>Expiry Date<b>15 Sep 2026</b></span><span>Amount Paid<b>₹1,500</b></span><span>Payment Status<b>Paid</b></span><span>Trainer<b>Alex Sharma</b></span></div></article>
+        </section>
+        <section class="two-column">
+            <article class="panel"><div class="panel-heading"><h2>Recent Activity</h2></div><div class="timeline"><p><b>19 Sep</b> Checked in for gym session</p><p><b>18 Sep</b> Payment received — ₹1,500</p><p><b>15 Sep</b> Membership renewed</p></div></article>
+            <article class="panel"><div class="panel-heading"><h2>Quick Actions</h2></div><a class="action-card" href="#">Make Payment <span>→</span></a><a class="action-card" href="#">Renew Membership <span>→</span></a><a class="action-card" href="bookings.html">Book Session <span>→</span></a></article>
+        </section>
+    
+            </div>
+        </main>
+    </div>
+    <script src="firebase-connection.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

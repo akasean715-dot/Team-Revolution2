@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings — TEAM REVOLUTION Gym Management</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="firebase-config.js"></script>
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <a class="brand" href="index.html">
+                <img src="assets/tribal-logo-192.png" alt="Team Revolution" class="tca-logo">
+                <span><strong>TEAM REVOLUTION</strong><small>GYM MANAGEMENT</small></span>
+            </a>
+
+            <nav class="sidebar-nav">
+                <span class="nav-label">MAIN</span>
+                <a href="index.html">Dashboard</a>
+<a href="members.html">Members</a>
+<a href="memberships.html">Memberships</a>
+<a href="attendance.html">Attendance</a>
+<a href="bookings.html">Bookings</a>
+<a href="trainers.html">Trainers</a>
+<a href="finance.html">Income & Expenses</a>
+<a href="reports.html">Reports</a>
+<a href="settings.html" class="active">Settings</a>
+            </nav>
+
+            <div class="sidebar-promo">
+                <span>STRONGER</span>
+                <strong>Healthier.<br>Happier.</strong>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div class="search-box"><span>⌕</span><input type="search" placeholder="Search members, bookings, or anything..."></div>
+                <div class="topbar-user"><button class="icon-btn" aria-label="Notifications">♧</button><div class="user-avatar">A</div><div><strong>Admin</strong><small>Gym Owner</small></div><span>⌄</span></div>
+            </header>
+
+            <div class="content">
+                
+        <section class="page-header">
+            <div><span class="eyebrow">SYSTEM</span><h1>Settings</h1><p>Configure your gym, staff, payments and dashboard preferences.</p></div>
+            <button class="btn btn-primary">Save Changes</button>
+        </section>
+        <div class="settings-layout">
+            <aside class="settings-nav"><a class="active" href="#general">General</a><a href="#gym">Gym Information</a><a href="#membership">Memberships</a><a href="#payments">Payments</a><a href="#staff">Staff & Roles</a><a href="#trainer-profiles">Trainer Profiles</a><a href="#notifications">Notifications</a></aside>
+            <div class="settings-content">
+                <article class="panel" id="general"><div class="panel-heading"><div><span class="eyebrow">GENERAL</span><h2>General Settings</h2></div></div><div class="form-grid"><label>Email<input type="text" value="Admin"></label><label>Owner Name<input type="email" value="admin@gym.com"></label><label>Phone<input type="tel" value="+91 98765 43210"></label><label>Currency<select><option>INR — ₹</option><option>USD — $</option></select></label><label>Timezone<select><option>Asia/Kolkata</option></select></label></div></article>
+                <article class="panel" id="gym"><div class="panel-heading"><h2>Gym Information</h2></div><div class="form-grid"><label>Address<textarea>123 Fitness Street</textarea></label><label>Opening Hours<input type="text" value="5:00 AM – 10:00 PM"></label></div></article>
+                <article class="panel" id="payments"><div class="panel-heading"><h2>Payment Methods</h2></div><div class="toggle-row"><div><b>Cash</b><small>Allow cash payments</small></div><input type="checkbox" checked></div><div class="toggle-row"><div><b>UPI</b><small>Allow UPI payments</small></div><input type="checkbox" checked></div><div class="toggle-row"><div><b>Card</b><small>Allow card payments</small></div><input type="checkbox" checked></div></article>
+                <article class="panel" id="trainer-profiles"><div class="panel-heading"><div><span class="eyebrow">TRAINERS</span><h2>Trainer Profiles</h2><p style="margin:4px 0 0;color:#71808b;font-size:10px">Change trainer profile photos without editing your code.</p></div></div><div id="trainer-profiles-list" class="trainer-profile-settings-list"></div></article>
+                <article class="panel" id="notifications"><div class="panel-heading"><h2>Notifications</h2></div><div class="toggle-row"><div><b>Expiry reminders</b><small>Notify when memberships are expiring</small></div><input type="checkbox" checked></div><div class="toggle-row"><div><b>Payment reminders</b><small>Notify members about pending payments</small></div><input type="checkbox" checked></div></article>
+            </div>
+        </div>
+    
+            </div>
+        </main>
+    </div>
+    <script src="firebase-connection.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

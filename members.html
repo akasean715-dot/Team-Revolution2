@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Members — TEAM REVOLUTION Gym Management</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="firebase-config.js"></script>
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <a class="brand" href="index.html">
+                <img src="assets/tribal-logo-192.png" alt="Team Revolution" class="tca-logo">
+                <span><strong>TEAM REVOLUTION</strong><small>GYM MANAGEMENT</small></span>
+            </a>
+
+            <nav class="sidebar-nav">
+                <span class="nav-label">MAIN</span>
+                <a href="index.html">Dashboard</a>
+<a href="members.html" class="active">Members</a>
+<a href="memberships.html">Memberships</a>
+<a href="attendance.html">Attendance</a>
+<a href="bookings.html">Bookings</a>
+<a href="trainers.html">Trainers</a>
+<a href="finance.html">Income & Expenses</a>
+<a href="reports.html">Reports</a>
+<a href="settings.html">Settings</a>
+            </nav>
+
+            <div class="sidebar-promo">
+                <span>STRONGER</span>
+                <strong>Healthier.<br>Happier.</strong>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div class="search-box"><span>⌕</span><input type="search" placeholder="Search members, bookings, or anything..."></div>
+                <div class="topbar-user"><button class="icon-btn" aria-label="Notifications">♧</button><div class="user-avatar">A</div><div><strong>Admin</strong><small>Gym Owner</small></div><span>⌄</span></div>
+            </header>
+
+            <div class="content">
+                
+        <section class="page-header">
+            <div><span class="eyebrow">MEMBERS</span><h1>Members</h1><p>Manage your gym members and their membership details.</p></div>
+            <button class="btn btn-primary">+ Add Member</button>
+        </section>
+        <section class="stats-grid compact">
+            <article class="stat-card"><span>Total Members</span><strong>248</strong></article>
+            <article class="stat-card"><span>Active</span><strong>193</strong></article>
+            <article class="stat-card"><span>Expiring</span><strong>17</strong></article>
+            <article class="stat-card"><span>Expired</span><strong>21</strong></article>
+        </section>
+        <article class="panel table-panel">
+            <div class="toolbar"><input type="search" placeholder="Search members..."><select><option>All Plans</option><option>Monthly</option><option>Premium</option><option>Annual</option></select><select><option>All Status</option><option>Active</option><option>Expiring</option><option>Expired</option></select></div>
+            <div class="table-wrap"><table><thead><tr><th>Member</th><th>Phone</th><th>Plan</th><th>Start Date</th><th>Expiry Date</th><th>Status</th><th>Action</th></tr></thead>
+            <tbody>
+            <tr><td><b>Rahul Sharma</b><small>MEM-0012</small></td><td>9876543210</td><td>Premium</td><td>01 Sep 2026</td><td>30 Sep 2026</td><td><span class="badge success">Active</span></td><td><a href="member-profile.html">View</a></td></tr>
+            <tr><td><b>Ananya Singh</b><small>MEM-0013</small></td><td>9123456780</td><td>Monthly</td><td>15 Aug 2026</td><td>15 Sep 2026</td><td><span class="badge warning">Expiring</span></td><td><a href="member-profile.html">View</a></td></tr>
+            <tr><td><b>Arjun Das</b><small>MEM-0014</small></td><td>9012345678</td><td>Basic</td><td>01 Jul 2026</td><td>31 Jul 2026</td><td><span class="badge danger">Expired</span></td><td><a href="member-profile.html">View</a></td></tr>
+            <tr><td><b>Priya Mehta</b><small>MEM-0015</small></td><td>9001122334</td><td>Standard</td><td>20 Aug 2026</td><td>20 Sep 2026</td><td><span class="badge success">Active</span></td><td><a href="member-profile.html">View</a></td></tr>
+            </tbody></table></div>
+        </article>
+    
+            </div>
+        </main>
+    </div>
+    <script src="firebase-connection.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
