@@ -2043,134 +2043,246 @@ input:focus,select:focus,textarea:focus{
    with Settings last, on mobile/tablet only.
    Desktop layout is intentionally unchanged.
    ========================================================= */
-@media (max-width: 900px) {
-    body:has(.app-shell) .app-shell {
+
+
+/* =========================================================
+   FINAL MOBILE RESPONSIVE OVERRIDE
+   All navigation sits above every page on phones/tablets.
+   No hamburger/menu button is used. Desktop stays unchanged.
+   ========================================================= */
+@media screen and (max-width: 900px) {
+    html, body {
+        width: 100%;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+
+    .app-shell {
         display: block !important;
         width: 100% !important;
-        min-height: 100vh;
+        max-width: 100% !important;
+        min-height: 100vh !important;
+        overflow-x: clip;
     }
 
-    body:has(.app-shell) .sidebar {
+    .sidebar {
         position: relative !important;
         inset: auto !important;
-        width: 100% !important;
-        height: auto !important;
-        min-height: 0 !important;
-        padding: 14px 12px 12px !important;
         display: flex !important;
         flex-direction: column !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 14px 12px 12px !important;
         border-right: 0 !important;
-        border-bottom: 1px solid rgba(255,255,255,.08) !important;
-        z-index: 20;
+        border-bottom: 1px solid var(--border) !important;
     }
 
-    body:has(.app-shell) .brand {
-        flex: 0 0 auto !important;
+    .brand {
+        width: 100% !important;
+        max-width: 100% !important;
         padding: 2px 8px 14px !important;
         margin: 0 !important;
     }
 
-    /* All navigation links are visible in two columns, with
-       Settings at the end, before the page's topbar/content. */
-    body:has(.app-shell) .sidebar-nav {
+    /* Explicitly keep the full navigation visible; no hamburger toggle. */
+    .mobile-menu-toggle,
+    .mobile-menu-button,
+    .hamburger-menu,
+    .menu-toggle {
+        display: none !important;
+    }
+
+    .sidebar-nav,
+    .sidebar-nav.mobile-menu-open {
         display: grid !important;
+        visibility: visible !important;
+        position: static !important;
         width: 100% !important;
+        max-width: 100% !important;
+        height: auto !important;
+        max-height: none !important;
         grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        grid-auto-flow: row !important;
         gap: 4px 6px !important;
         margin: 0 !important;
+        padding: 0 !important;
+        overflow: visible !important;
+        transform: none !important;
     }
 
-    body:has(.app-shell) .sidebar-nav .nav-label {
+    .sidebar-nav .nav-label {
+        display: block !important;
         grid-column: 1 / -1 !important;
+        margin: 8px 10px 5px !important;
     }
 
-    body:has(.app-shell) .sidebar-nav a {
+    .sidebar-nav a {
+        display: flex !important;
+        align-items: center !important;
         width: 100% !important;
         min-width: 0 !important;
-        min-height: 42px !important;
-        padding: 0 10px !important;
+        min-height: 40px !important;
+        height: auto !important;
+        padding: 7px 9px !important;
+        margin: 0 !important;
         box-sizing: border-box !important;
         font-size: 11px !important;
+        line-height: 1.35 !important;
         white-space: normal !important;
+        overflow-wrap: anywhere !important;
     }
 
-    body:has(.app-shell) .sidebar-nav a::before {
+    .sidebar-nav a::before {
         flex: 0 0 5px !important;
-        margin-right: 8px !important;
-    }
-
-    body:has(.app-shell) .sidebar-promo {
-        display: none !important;
-    }
-
-    body:has(.app-shell) .main-content {
-        display: block !important;
-        width: 100% !important;
-        min-width: 0 !important;
-        min-height: 0 !important;
-        margin: 0 !important;
-    }
-
-    body:has(.app-shell) .topbar {
-        position: relative !important;
-        top: auto !important;
-        width: 100% !important;
-        height: auto !important;
-        min-height: 62px !important;
-        padding: 10px 14px !important;
-        gap: 10px !important;
-    }
-
-    body:has(.app-shell) .search-box {
-        width: auto !important;
-        flex: 1 1 auto !important;
-        min-width: 0 !important;
-    }
-
-    body:has(.app-shell) .topbar-user {
-        flex: 0 0 auto !important;
-        gap: 7px !important;
-    }
-
-    body:has(.app-shell) .topbar-user > div:not(.user-avatar),
-    body:has(.app-shell) .topbar-user > span {
-        display: none !important;
-    }
-
-    body:has(.app-shell) .content {
-        width: 100% !important;
-        max-width: none !important;
-        min-width: 0 !important;
-        margin: 0 !important;
-        padding: 20px 14px 30px !important;
-    }
-}
-
-@media (max-width: 520px) {
-    body:has(.app-shell) .sidebar {
-        padding: 12px 10px 10px !important;
-    }
-
-    body:has(.app-shell) .sidebar-nav {
-        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
-        gap: 4px !important;
-    }
-
-    body:has(.app-shell) .sidebar-nav a {
-        min-height: 40px !important;
-        padding: 0 8px !important;
-        font-size: 10px !important;
-    }
-
-    body:has(.app-shell) .sidebar-nav a::before {
         margin-right: 7px !important;
     }
 
-    body:has(.app-shell) .topbar {
-        padding: 9px 12px !important;
+    .sidebar-promo {
+        display: none !important;
     }
 
-    body:has(.app-shell) .content {
-        padding: 18px 12px 26px !important;
+    .main-content {
+        display: block !important;
+        position: relative !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        left: auto !important;
+        right: auto !important;
+    }
+
+    .topbar {
+        position: relative !important;
+        top: auto !important;
+        display: flex !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        height: auto !important;
+        min-height: 58px !important;
+        padding: 9px 12px !important;
+        gap: 8px !important;
+    }
+
+    .search-box {
+        width: auto !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        flex: 1 1 auto !important;
+    }
+
+    .topbar-user {
+        flex: 0 0 auto !important;
+        gap: 6px !important;
+    }
+
+    .topbar-user > div:not(.user-avatar),
+    .topbar-user > span,
+    .topbar .icon-btn {
+        display: none !important;
+    }
+
+    .content {
+        display: block !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+        padding: 18px 12px 28px !important;
+    }
+
+    .page-header {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        align-items: flex-start !important;
+        flex-wrap: wrap !important;
+        gap: 12px !important;
+    }
+
+    .page-header > div,
+    .page-header h1,
+    .page-header p {
+        max-width: 100% !important;
+        overflow-wrap: anywhere !important;
+    }
+
+    .page-actions {
+        width: 100% !important;
+        max-width: 100% !important;
+        flex-wrap: wrap !important;
+    }
+
+    .stats-grid,
+    .stats-grid.compact {
+        width: 100% !important;
+        min-width: 0 !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 9px !important;
+    }
+
+    .dashboard-grid,
+    .plan-grid,
+    .report-grid,
+    .trainer-grid,
+    .profile-grid,
+    .settings-layout {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    .panel,
+    .plan-card,
+    .trainer-card,
+    .report-card,
+    .chart-panel,
+    .quick-actions,
+    .table-wrap {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .settings-nav {
+        position: static !important;
+        max-width: 100% !important;
+        overflow-x: auto !important;
+    }
+
+    img, canvas, svg, table {
+        max-width: 100%;
+    }
+}
+
+@media screen and (max-width: 460px) {
+    .sidebar {
+        padding: 12px 10px 10px !important;
+    }
+
+    .sidebar-nav {
+        gap: 3px 4px !important;
+    }
+
+    .sidebar-nav a {
+        min-height: 38px !important;
+        padding: 6px 7px !important;
+        font-size: 10px !important;
+    }
+
+    .content {
+        padding: 16px 10px 24px !important;
+    }
+
+    .stats-grid,
+    .stats-grid.compact {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
     }
 }
