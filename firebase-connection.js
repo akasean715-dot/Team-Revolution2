@@ -69,7 +69,11 @@
 
         sdk: {
           app: appSdk,
-          auth: authSdk,
+          auth: {
+            onAuthStateChanged: authSdk.onAuthStateChanged,
+            signInWithEmailAndPassword: authSdk.signInWithEmailAndPassword,
+            signOut: authSdk.signOut
+          },
           firestore: firestoreSdk,
           storage: storageSdk
         },

@@ -1,4 +1,4 @@
-const CACHE_NAME = "team-revolution-v1";
+const CACHE_NAME = "team-revolution-v2";
 
 const APP_FILES = [
   "./",
@@ -6,6 +6,7 @@ const APP_FILES = [
   "./style.css",
   "./script.js",
   "./firebase-connection.js",
+  "./firebase-config.js",
   "./manifest.json",
   "./assets/tribal-logo-192.png",
   "./assets/tribal-logo-512.png"

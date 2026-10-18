@@ -79,8 +79,11 @@ async function saveToCloud() {
     );
 
     console.info('[TEAM REVOLUTION] Data synced to Firestore.');
+    return true;
   } catch (error) {
     console.warn('[TEAM REVOLUTION] Cloud sync failed. Local data is still safe.', error);
+    if (window.__TR_APP_STARTED) toast('Cloud sync failed. Check Firestore database rules.', 'error');
+    return false;
   }
 }
 
@@ -156,9 +159,11 @@ async function loadCloudData() {
         '[TEAM REVOLUTION] No shared gym data found yet. Creating it...'
       );
 
+      const firstWriteSucceeded = await saveToCloud();
+      if (!firstWriteSucceeded) {
+        throw new Error('Could not create the initial Firestore data document. Check Firestore rules.');
+      }
       cloudSyncReady = true;
-
-      await saveToCloud();
     }
 
     cloudSyncReady = true;
@@ -222,6 +227,7 @@ async function loadCloudData() {
       '[TEAM REVOLUTION] Could not load shared gym data.',
       error
     );
+    if (window.__TR_APP_STARTED) toast('Could not connect to cloud data. Check Firestore rules and your internet connection.', 'error');
   }
 }
   function getSettings() {
@@ -272,8 +278,9 @@ async function loadCloudData() {
   function injectUIStyles() {
     if (document.getElementById('if-runtime-styles')) return;
     const style=document.createElement('style'); style.id='if-runtime-styles'; style.textContent=`
-      .if-chart-wrap{position:relative;width:100%;height:100%;min-height:230px}.if-chart{display:block;width:100%;height:100%;min-height:230px}.if-chart-legend{position:absolute;right:8px;top:0;display:flex;gap:16px;font-size:10px;color:#9aa4a7}.if-chart-legend span{display:flex;align-items:center;gap:6px}.if-chart-legend i{display:inline-block;width:8px;height:8px;border-radius:50%}.if-legend-income{background:#ff2d38}.if-legend-expense{background:#ff737a}.if-chart-empty{position:absolute;inset:45px 0 0;display:grid;place-items:center;color:#6f797d;font-size:12px;pointer-events:none}.if-donut-wrap{position:relative;width:170px;height:170px;margin:4px auto 14px}.if-donut-wrap svg{width:100%;height:100%;display:block}.if-donut-center{position:absolute;inset:0;display:grid;place-content:center;text-align:center;pointer-events:none}.if-donut-center strong{font-size:25px;color:#f1f3f2;line-height:1}.if-donut-center small{font-size:9px;color:#7e888b;margin-top:5px}.if-toast-wrap{position:fixed;right:24px;bottom:24px;z-index:9999;display:grid;gap:10px}.if-toast{min-width:280px;max-width:420px;padding:13px 16px;border:1px solid rgba(255,255,255,.1);background:#151a1d;color:#f4f5f4;border-radius:12px;box-shadow:0 18px 50px rgba(0,0,0,.35);display:flex;gap:12px;align-items:center;transform:translateY(18px);opacity:0;transition:.25s}.if-toast.show{transform:none;opacity:1}.if-toast span{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#ff2d38;color:#101214;font-weight:800}.if-toast.error span{background:#d56b6b;color:#fff}
-      .if-modal-backdrop{position:fixed;inset:0;background:rgba(2,5,7,.72);backdrop-filter:blur(8px);z-index:9998;display:grid;place-items:center;padding:20px}.if-modal{width:min(680px,100%);max-height:90vh;overflow:auto;background:#111619;border:1px solid rgba(255,255,255,.1);border-radius:18px;box-shadow:0 30px 100px rgba(0,0,0,.55);color:#eef0ee}.if-modal-head{display:flex;justify-content:space-between;gap:20px;padding:24px 26px 16px;border-bottom:1px solid rgba(255,255,255,.07)}.if-modal-head h2{margin:5px 0 0;font-size:22px}.if-modal-kicker{font-size:10px;letter-spacing:.16em;color:#ff2d38}.if-modal-close{font-size:28px;color:#9ca4a7;cursor:pointer}.if-modal-body{padding:22px 26px}.if-modal-actions{display:flex;justify-content:flex-end;gap:10px;padding:16px 26px 22px;border-top:1px solid rgba(255,255,255,.07)}.if-form{display:grid;grid-template-columns:1fr 1fr;gap:15px}.if-form .full{grid-column:1/-1}.if-form label{display:grid;gap:7px;font-size:12px;color:#aeb6b8}.if-form input,.if-form select,.if-form textarea{width:100%;padding:11px 12px;border:1px solid rgba(255,255,255,.1);border-radius:9px;background:#0b0f11;color:#f1f3f2;outline:none}.if-form input:focus,.if-form select:focus,.if-form textarea:focus{border-color:#ff2d38}.if-empty{padding:35px;text-align:center;color:#8e989b}.if-clickable{cursor:pointer}.if-filter-row{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 15px}.if-filter-row select,.if-filter-row input{padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.08);background:#0d1214;color:#dfe4e3}.if-mini-btn{padding:7px 10px;border-radius:7px;background:rgba(201,165,92,.12);color:#d8bd7e;border:1px solid rgba(201,165,92,.2);cursor:pointer}.if-chart{width:100%;height:100%;min-height:230px}.if-list-table{width:100%;border-collapse:collapse}.if-list-table th,.if-list-table td{text-align:left;padding:12px;border-bottom:1px solid rgba(255,255,255,.06);font-size:12px}.if-list-table th{color:#879195;font-size:10px;text-transform:uppercase;letter-spacing:.08em}.if-status{display:inline-flex;padding:5px 9px;border-radius:999px;font-size:10px;background:rgba(255,255,255,.07)}.if-status.success{color:#75d59b;background:rgba(63,180,105,.12)}.if-status.warning{color:#ff737a;background:rgba(201,165,92,.12)}.if-status.danger{color:#e68181;background:rgba(215,85,85,.12)}
+      .tr-auth-gate{position:fixed;inset:0;z-index:20000;display:grid;place-items:center;padding:22px;background:radial-gradient(ellipse at top,rgba(255,45,56,.12),transparent 45%),#060b10;color:#eef0ee;font-family:'DM Sans',sans-serif}.tr-auth-card{width:min(430px,100%);padding:30px;border:1px solid rgba(255,255,255,.1);border-radius:20px;background:#0c151e;box-shadow:0 30px 90px rgba(0,0,0,.45);display:grid;gap:14px}.tr-auth-mark{width:46px;height:46px;display:grid;place-items:center;border-radius:14px;background:#ff2d38;color:#fff;font-weight:900}.tr-auth-card h1{font:800 27px Manrope,sans-serif;margin:0}.tr-auth-card p{margin:0 0 4px;color:#9aa4a7;font-size:13px;line-height:1.55}.tr-auth-card label{display:grid;gap:7px;color:#aeb6b8;font-size:12px}.tr-auth-card input{width:100%;padding:12px;border:1px solid rgba(255,255,255,.12);border-radius:9px;background:#080d12;color:#fff;outline:none}.tr-auth-card input:focus{border-color:#ff2d38}.tr-auth-card button{width:100%;justify-content:center}.tr-auth-card small{font-size:10px;line-height:1.5;color:#758085}.tr-auth-error{font-size:12px;line-height:1.45;color:#ff8a8f;min-height:17px}
+      .if-chart-wrap{position:relative;width:100%;height:auto;min-height:0;min-width:0}.if-chart{display:block;width:100%;height:auto;min-height:0;max-width:100%;aspect-ratio:3/1;overflow:visible}.chart-placeholder.tall .if-chart{min-width:0!important;width:100%!important;height:auto!important}.if-chart-legend{position:absolute;right:8px;top:0;display:flex;gap:16px;font-size:10px;color:#9aa4a7}.if-chart-legend span{display:flex;align-items:center;gap:6px}.if-chart-legend i{display:inline-block;width:8px;height:8px;border-radius:50%}.if-legend-income{background:#ff2d38}.if-legend-expense{background:#ff737a}.if-chart-empty{position:absolute;inset:45px 0 0;display:grid;place-items:center;color:#6f797d;font-size:12px;pointer-events:none}.if-donut-wrap{position:relative;width:170px;height:170px;margin:4px auto 14px}.if-donut-wrap svg{width:100%;height:100%;display:block}.if-donut-center{position:absolute;inset:0;display:grid;place-content:center;text-align:center;pointer-events:none}.if-donut-center strong{font-size:25px;color:#f1f3f2;line-height:1}.if-donut-center small{font-size:9px;color:#7e888b;margin-top:5px}.if-toast-wrap{position:fixed;right:24px;bottom:24px;z-index:9999;display:grid;gap:10px}.if-toast{min-width:280px;max-width:420px;padding:13px 16px;border:1px solid rgba(255,255,255,.1);background:#151a1d;color:#f4f5f4;border-radius:12px;box-shadow:0 18px 50px rgba(0,0,0,.35);display:flex;gap:12px;align-items:center;transform:translateY(18px);opacity:0;transition:.25s}.if-toast.show{transform:none;opacity:1}.if-toast span{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;background:#ff2d38;color:#101214;font-weight:800}.if-toast.error span{background:#d56b6b;color:#fff}
+      .if-modal-backdrop{position:fixed;inset:0;background:rgba(2,5,7,.72);backdrop-filter:blur(8px);z-index:9998;display:grid;place-items:center;padding:20px}.if-modal{width:min(680px,100%);max-height:90vh;overflow:auto;background:#111619;border:1px solid rgba(255,255,255,.1);border-radius:18px;box-shadow:0 30px 100px rgba(0,0,0,.55);color:#eef0ee}.if-modal-head{display:flex;justify-content:space-between;gap:20px;padding:24px 26px 16px;border-bottom:1px solid rgba(255,255,255,.07)}.if-modal-head h2{margin:5px 0 0;font-size:22px}.if-modal-kicker{font-size:10px;letter-spacing:.16em;color:#ff2d38}.if-modal-close{font-size:28px;color:#9ca4a7;cursor:pointer}.if-modal-body{padding:22px 26px}.if-modal-actions{display:flex;justify-content:flex-end;gap:10px;padding:16px 26px 22px;border-top:1px solid rgba(255,255,255,.07)}.if-form{display:grid;grid-template-columns:1fr 1fr;gap:15px}.if-form .full{grid-column:1/-1}.if-form label{display:grid;gap:7px;font-size:12px;color:#aeb6b8}.if-form input,.if-form select,.if-form textarea{width:100%;padding:11px 12px;border:1px solid rgba(255,255,255,.1);border-radius:9px;background:#0b0f11;color:#f1f3f2;outline:none}.if-form input:focus,.if-form select:focus,.if-form textarea:focus{border-color:#ff2d38}.if-empty{padding:35px;text-align:center;color:#8e989b}.if-clickable{cursor:pointer}.if-filter-row{display:flex;gap:10px;flex-wrap:wrap;margin:0 0 15px}.if-filter-row select,.if-filter-row input{padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,.08);background:#0d1214;color:#dfe4e3}.if-mini-btn{padding:7px 10px;border-radius:7px;background:rgba(201,165,92,.12);color:#d8bd7e;border:1px solid rgba(201,165,92,.2);cursor:pointer}.if-chart{width:100%;height:auto;min-height:0;max-width:100%;aspect-ratio:3/1}.if-list-table{width:100%;border-collapse:collapse}.if-list-table th,.if-list-table td{text-align:left;padding:12px;border-bottom:1px solid rgba(255,255,255,.06);font-size:12px}.if-list-table th{color:#879195;font-size:10px;text-transform:uppercase;letter-spacing:.08em}.if-status{display:inline-flex;padding:5px 9px;border-radius:999px;font-size:10px;background:rgba(255,255,255,.07)}.if-status.success{color:#75d59b;background:rgba(63,180,105,.12)}.if-status.warning{color:#ff737a;background:rgba(201,165,92,.12)}.if-status.danger{color:#e68181;background:rgba(215,85,85,.12)}
       .search-box{position:relative;z-index:20}.if-global-results{position:absolute;left:0;right:0;top:calc(100% + 8px);z-index:10000;overflow:hidden;border:1px solid rgba(255,255,255,.1);border-radius:12px;background:#11181c;box-shadow:0 22px 60px rgba(0,0,0,.45);max-height:430px;overflow-y:auto}.if-global-result{width:100%;display:flex;align-items:center;gap:12px;padding:12px 14px;border:0;border-bottom:1px solid rgba(255,255,255,.055);background:transparent;color:#eef0ee;text-align:left;cursor:pointer}.if-global-result:last-child{border-bottom:0}.if-global-result:hover,.if-global-result:focus{background:rgba(201,165,92,.1);outline:none}.if-global-icon{flex:0 0 30px;width:30px;height:30px;border-radius:9px;display:grid;place-items:center;background:rgba(201,165,92,.12);border:1px solid rgba(201,165,92,.2);color:#d8bd7e;font-size:10px;font-weight:800;letter-spacing:.04em}.if-global-result-copy{min-width:0;display:grid;gap:4px;flex:1}.if-global-result-copy strong{font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.if-global-result-copy small{font-size:10px;color:#7f898d;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.if-global-result-copy small b{color:#ff2d38;font-weight:600}.if-global-arrow{color:#707a7e;font-size:15px}.if-global-empty{padding:20px 16px;color:#8e989b;font-size:12px}.if-global-empty strong{color:#d8bd7e;font-weight:600}
       .if-notification-wrap{position:relative}.if-notification-wrap .icon-btn{position:relative}
       .if-notification-badge{position:absolute;top:-4px;right:-4px;min-width:17px;height:17px;padding:0 4px;border-radius:99px;background:#d56b6b;color:#fff;border:2px solid #0b1115;font-size:9px;font-weight:800;display:grid;place-items:center;line-height:1}
@@ -287,7 +294,7 @@ async function loadCloudData() {
       .if-notification-empty{padding:28px 18px;text-align:center;color:#7f898d;font-size:11px}.if-notification-footer{padding:10px 15px;text-align:center;border-top:1px solid rgba(255,255,255,.07);font-size:10px;color:#667176}
 
       .booking-calendar-nav{display:flex;align-items:center;gap:10px}.booking-calendar-nav b{min-width:150px;text-align:center}.calendar-grid .calendar-day{position:relative;border:0;cursor:pointer;text-align:left;min-height:76px;padding:10px;background:#0b151e;color:#d8e0e4}.calendar-grid .calendar-day:hover{background:#111e29}.calendar-grid .calendar-day.today{background:linear-gradient(135deg,rgba(255,45,56,.9),rgba(255,45,56,.65));color:#fff}.calendar-grid .calendar-day.selected{box-shadow:inset 0 0 0 2px rgba(255,255,255,.8)}.calendar-grid .calendar-day.muted{opacity:.35}.calendar-grid .calendar-day span{font-size:11px;font-weight:800}.calendar-grid .calendar-day small{display:block;margin-top:8px;font-size:8px;color:inherit;opacity:.8}.calendar-grid .calendar-weekday{min-height:35px!important;display:grid!important;place-items:center!important;padding:5px!important}.booking-list-view{padding-top:2px}.if-booking-table{display:grid;overflow:auto}.if-booking-table-head,.if-booking-table-row{min-width:820px;display:grid;grid-template-columns:1.1fr .8fr 1.4fr 1.2fr 1.2fr .9fr;gap:12px;align-items:center;padding:12px 14px;border-bottom:1px solid rgba(255,255,255,.06);font-size:11px}.if-booking-table-head{color:#7f898d;font-size:9px;text-transform:uppercase;letter-spacing:.08em}.if-booking-table-row b{color:#eef0ee}.booking-types-chart{display:grid;gap:17px;padding:4px 0}.booking-type-head{display:flex;justify-content:space-between;gap:15px;font-size:11px}.booking-type-head span{color:#cfd6d8}.booking-type-head strong{color:#fff}.booking-type-track{height:7px;background:#182128;border-radius:99px;overflow:hidden;margin-top:8px}.booking-type-track span{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,#ff2d38,#ff737a)}.booking-type-row small{display:block;margin-top:6px;color:#6f7a7e;font-size:9px}
-      @media(max-width:640px){.if-form{grid-template-columns:1fr}.if-form .full{grid-column:auto}.if-toast-wrap{left:15px;right:15px}.if-toast{min-width:0}.if-modal{max-height:94vh}}
+      @media(max-width:640px){.if-chart-legend{right:4px;gap:9px;font-size:9px}.if-chart-wrap{overflow:hidden}.if-chart{aspect-ratio:2.35/1}.if-form{grid-template-columns:1fr}.if-form .full{grid-column:auto}.if-toast-wrap{left:15px;right:15px}.if-toast{min-width:0}.if-modal{max-height:94vh}}
     `; document.head.appendChild(style);
   }
 
@@ -2248,25 +2255,103 @@ async function loadCloudData() {
     toast('Booking cancelled.');
   });
 
-  function init(){
+  function showAuthGate(message='Sign in with the gym owner account to continue.'){
+    document.querySelector('.tr-auth-gate')?.remove();
+    const gate=document.createElement('div');
+    gate.className='tr-auth-gate';
+    gate.innerHTML=`<form class="tr-auth-card" id="tr-auth-form" novalidate>
+      <div class="tr-auth-mark">TR</div>
+      <span class="eyebrow">TEAM REVOLUTION</span>
+      <h1>Owner sign in</h1>
+      <p>Sign in to securely access gym members, attendance, finance and reports.</p>
+      <label>Email address<input type="email" name="email" autocomplete="username" required placeholder="owner@example.com"></label>
+      <label>Password<input type="password" name="password" autocomplete="current-password" required placeholder="Enter your password"></label>
+      <div class="tr-auth-error" role="alert">${esc(message)}</div>
+      <button type="submit" class="btn btn-primary">Sign in securely</button>
+      <small>Create the owner account in Firebase Console → Authentication → Users. This screen does not allow public sign-up.</small>
+    </form>`;
+    document.body.appendChild(gate);
+    const form=gate.querySelector('#tr-auth-form');
+    form.addEventListener('submit',async e=>{
+      e.preventDefault();
+      const email=String(form.elements.email.value||'').trim();
+      const password=String(form.elements.password.value||'');
+      const errorBox=form.querySelector('.tr-auth-error');
+      const button=form.querySelector('button[type="submit"]');
+      if(!email || !password){errorBox.textContent='Enter your email and password.';return;}
+      button.disabled=true;button.textContent='Signing in…';errorBox.textContent='';
+      try{
+        const firebase=await window.TCAFirebaseReady;
+        if(!firebase?.sdk?.auth?.signInWithEmailAndPassword) throw new Error('Firebase did not initialize. Check firebase-config.js and internet access.');
+        await firebase.sdk.auth.signInWithEmailAndPassword(firebase.auth,email,password);
+      }catch(error){
+        console.error('[TEAM REVOLUTION] Sign-in failed:',error);
+        const code=error?.code||'';
+        errorBox.textContent=code==='auth/invalid-credential'||code==='auth/wrong-password'||code==='auth/user-not-found'
+          ? 'Email or password is incorrect. Check the owner account in Firebase Authentication.'
+          : code==='auth/operation-not-allowed'
+            ? 'Email/Password sign-in is not enabled. Enable it in Firebase Authentication → Sign-in method.'
+            : (error?.message||'Sign-in failed. Check Firebase Authentication setup.');
+        button.disabled=false;button.textContent='Sign in securely';
+      }
+    });
+  }
+
+  function startApplication(){
+    const appShell=document.querySelector('.app-shell');
+    if(window.__TR_APP_INITIALIZED){
+      window.__TR_APP_STARTED=true;
+      document.querySelector('.tr-auth-gate')?.remove();
+      if(appShell) appShell.style.display='flex';
+      return;
+    }
+    window.__TR_APP_INITIALIZED=true;
+    window.__TR_APP_STARTED=true;
+    document.querySelector('.tr-auth-gate')?.remove();
+    const shell=document.querySelector('.app-shell');
+    if(shell) shell.style.display='flex';
     injectUIStyles();
     setupHeader();
     setupProfilePhoto();
     setupGlobalSearch();
     renderCurrentPage();
-
     document.addEventListener('keydown', e => {
-        if(e.key === 'Escape'){
-            document.querySelector('.if-modal-backdrop')?.remove();
-        }
+      if(e.key==='Escape') document.querySelector('.if-modal-backdrop')?.remove();
     });
+    const userBox=document.querySelector('.topbar-user');
+    if(userBox && !userBox.querySelector('[data-tr-signout]')){
+      const out=document.createElement('button');
+      out.type='button';out.dataset.trSignout='1';out.className='btn btn-secondary';out.textContent='Sign out';
+      out.style.cssText='margin-left:10px;padding:8px 10px;font-size:11px;white-space:nowrap';
+      out.addEventListener('click',async()=>{
+        const firebase=await window.TCAFirebaseReady;
+        try{await firebase.sdk.auth.signOut(firebase.auth);}catch(error){console.error(error);toast('Could not sign out.','error');}
+      });
+      userBox.appendChild(out);
+    }
+    loadCloudData().then(()=>{cloudSyncReady=true;});
+  }
 
-    document.querySelector('.brand')?.addEventListener('click', () => {});
-
-    // Start shared Firestore synchronization
-    loadCloudData().then(() => {
-        cloudSyncReady = true;
+  async function init(){
+    const shell=document.querySelector('.app-shell');
+    if(shell) shell.style.display='none';
+    injectUIStyles();
+    const firebase=await window.TCAFirebaseReady;
+    if(!firebase?.auth || !firebase?.sdk?.auth?.onAuthStateChanged){
+      showAuthGate('Firebase did not connect. Check your configuration and internet connection, then refresh.');
+      return;
+    }
+    firebase.sdk.auth.onAuthStateChanged(firebase.auth,user=>{
+      if(user){startApplication();}
+      else{
+        window.__TR_APP_STARTED=false;
+        if(shell) shell.style.display='none';
+        showAuthGate();
+      }
+    },error=>{
+      console.error('[TEAM REVOLUTION] Auth state error:',error);
+      showAuthGate('Could not verify your sign-in. Check Firebase Authentication setup.');
     });
-}
+  }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',init);else init();
 })();

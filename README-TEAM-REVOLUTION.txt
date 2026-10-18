@@ -1,50 +1,34 @@
-# Team Revolution MMA Management
+TEAM REVOLUTION GYM MANAGEMENT — Firebase-connected build
 
-This is the rebranded copy of the supplied gym management project. Existing page structure,
-styles, and application logic were retained as far as possible. The supplied Team Revolution
-logo replaces the previous PWA logo assets.
+Firebase project configured in firebase-config.js:
+- Project ID: the-revolution3
+- Web app config: the configuration supplied by the project owner
 
-## Required before launch: connect the new client's Firebase project
+IMPORTANT SETUP BEFORE USE
+1. In Firebase Console, open Build → Authentication → Get started.
+2. Open Sign-in method and enable Email/Password. Do NOT enable public account creation in this website; there is only a sign-in screen.
+3. In Authentication → Users, add the gym owner account with an email and password. Use those credentials on the website's Owner sign in screen.
+4. Open Firestore Database → Rules. Publish the contents of firestore.rules from this folder. These rules require a signed-in Firebase user. Only create trusted owner/staff accounts in Firebase Authentication.
+5. Host the whole folder on HTTPS or use a local web server (for example VS Code Live Server). Do not open HTML files directly with file://.
+6. Open the site and sign in. Data is stored locally as a fallback and synchronized to Firestore at gymData/appData. Other pages/devices load the same cloud data after signing in.
 
-1. Create/open the NEW client's project in the Firebase Console.
-2. Register a Web App in Project settings → General → Your apps.
-3. Copy that Web App's Firebase config into `firebase-config.js`, replacing every
-   `YOUR_...` placeholder. Keep the property names as shown.
-4. In Firebase Authentication, enable the sign-in provider used by the client (Email/Password
-   if that is what their users use), and create/authorize the required user accounts.
-5. Create/secure Firestore and Storage according to the client's access requirements.
-   Review Firestore and Storage security rules before launch; do not use open public rules.
-6. Deploy the folder to a web host (or test through a local web server). Firebase modules
-   generally will not work when opened as a `file://` URL.
+FEATURES
+- Shared Firestore data for members, membership plans, transactions, bookings, attendance and trainers.
+- Owner sign-in through Firebase Authentication; no public sign-up form.
+- Sign-out button on the app pages.
+- Dashboard income/expense chart reads paid transaction records and supports This Month / Last 3 Months / Last 6 Months.
+- Membership, attendance, trainer and report charts use saved app data and are sized to fit responsive layouts.
+- QR attendance scanner and membership expiry validation remain in the app.
 
-The old Firebase project identifiers have been removed from the active configuration.
-The app cannot connect to the new project until its real web config is supplied. Firebase
-web config values identify a project but are not server secrets; never place service-account
-private keys in this frontend project.
+DATA NOTES
+- On the first successful connection, if gymData/appData does not exist yet, the app uploads its current local data (including sample/demo rows if present) to initialize the cloud document. Review/delete demo records in the app before using it with real gym data.
+- Firebase config values in a browser app identify the project and are not server private keys. Firestore security rules and Authentication protect the data; never use public read/write rules for real member records.
+- This is a single shared appData document, appropriate for this small single-gym starter. It is not a multi-tenant database design.
+- If a sync warning appears, check browser Console and Firestore Rules. Data may still remain in this browser's local storage until cloud sync succeeds.
 
-## Important data note
-
-The browser storage keys were namespaced for Team Revolution so the new client does not
-accidentally load the previous client's local browser data. The Firestore data is isolated
-by the new Firebase project once `firebase-config.js` is configured. Review existing database
-paths and security rules with the client before migrating any records.
-
-## Files
-- `firebase-config.js` — single Firebase web-app config location.
-- `firebase-connection.js` and `index.html` — existing Firebase initialization/connection logic.
-- `assets/tribal-logo-192.png` and `assets/tribal-logo-512.png` — Team Revolution logo renditions.
-TEMPORARY LOGIN BYPASS
-- The login screen and sign-in check are disabled temporarily, as requested.
-- This is suitable only for local/demo preview. Do not deploy publicly with sensitive gym/member data until authentication and Firebase security rules are restored and tested.
-
-
-QR CODE ATTENDANCE (added)
-- Open Members and click "QR Code" beside a member to generate/download their unique QR image.
-- Open Attendance and use "Start Camera Scanner" to scan a member code, or enter the member ID manually.
-- Attendance checks the member's expiry date and status before accepting a check-in.
-- A member can only be checked in once per day using this interface.
-- Camera scanning requires browser camera permission and a secure HTTPS website (localhost is also normally allowed).
-- QR generation/scanning libraries are loaded from CDNs and require an internet connection.
-- The QR contains the member ID, not private contact details.
-- The current app stores data in localStorage and optionally syncs through the configured Firestore document. Firebase config still contains placeholders in this ZIP, so shared multi-device attendance will not work until a real Firebase project is configured and secured.
-- The login bypass noted above remains enabled in this project. Do not publish it with real member information until authentication and Firestore security rules are restored and tested.
+FILES
+- firebase-config.js: Firebase web app configuration.
+- firebase-connection.js: initializes Firebase app, Authentication, Firestore and Storage SDKs.
+- firestore.rules: authenticated-only Firestore access rules.
+- script.js: app logic, cloud sync, charts and login gate.
+- index.html: dashboard and shared scripts.
