@@ -28,12 +28,8 @@
       { id:'TX-1002', date:'2026-09-18', description:'Electricity Bill', category:'Utilities', type:'Expense', amount:8400, status:'Paid' },
       { id:'TX-1003', date:'2026-09-17', description:'Anita Singh — PT', category:'Training', type:'Income', amount:6000, status:'Paid' }
     ],
-    bookings: [
-      { id:'BK-001', date:'2026-09-19', time:'07:00', member:'Rahul Sharma', type:'Personal Training', trainer:'Alex Sharma', status:'Confirmed' },
-      { id:'BK-002', date:'2026-09-19', time:'09:00', member:'Ananya Singh', type:'Yoga', trainer:'Priya Mehta', status:'Confirmed' },
-      { id:'BK-003', date:'2026-09-19', time:'17:30', member:'Priya Mehta', type:'Personal Training', trainer:'Maya Khanna', status:'Pending' },
-      { id:'BK-004', date:'2026-09-20', time:'08:00', member:'Arjun Das', type:'Strength Class', trainer:'Alex Sharma', status:'Confirmed' }
-    ],
+    // Start with no bookings. Only bookings explicitly created by the gym owner appear here.
+    bookings: [],
     attendance: [
       { id:'AT-001', member:'Rahul Sharma', date:'2026-09-19', checkIn:'06:42', checkOut:'08:10', duration:'1h 28m', plan:'Premium', status:'Present' },
       { id:'AT-002', member:'Ananya Singh', date:'2026-09-19', checkIn:'07:15', checkOut:'08:30', duration:'1h 15m', plan:'Monthly', status:'Present' },
@@ -47,13 +43,33 @@
   };
 
   const clone = o => JSON.parse(JSON.stringify(o));
+
+  // Remove only the four hard-coded sample bookings from older local/cloud data.
+  // User-created bookings use timestamp IDs and are left untouched.
+  const SAMPLE_BOOKING_IDS = new Set(['BK-001', 'BK-002', 'BK-003', 'BK-004']);
+  function removeSampleBookings(source) {
+    const cleaned = { ...clone(seed), ...(source || {}) };
+    const bookings = Array.isArray(cleaned.bookings) ? cleaned.bookings : [];
+    cleaned.bookings = bookings.filter(b => !SAMPLE_BOOKING_IDS.has(String(b?.id || '')));
+    return cleaned;
+  }
   function loadData() {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      if (!saved) { localStorage.setItem(STORAGE_KEY, JSON.stringify(seed)); return clone(seed); }
+      if (!saved) {
+        const initial = removeSampleBookings(seed);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
+        return initial;
+      }
       const parsed = JSON.parse(saved);
-      return { ...clone(seed), ...parsed };
-    } catch { return clone(seed); }
+      const cleaned = removeSampleBookings(parsed);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(cleaned));
+      return cleaned;
+    } catch {
+      const initial = removeSampleBookings(seed);
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(initial)); } catch {}
+      return initial;
+    }
   }
   let data = loadData();
   let cloudSyncReady = false;
@@ -72,7 +88,7 @@ async function saveToCloud() {
     await setDoc(
       doc(firebase.db, 'gymData', 'appData'),
       {
-        data: clone(data),
+        data: removeSampleBookings(data),
         updatedAt: new Date().toISOString()
       },
       { merge: true }
@@ -125,18 +141,19 @@ async function loadCloudData() {
 
     const cloudDoc = await getDoc(appDataRef);
 
+    let hadSampleBookingsInCloud = false;
+
     if (cloudDoc.exists()) {
 
       const cloudData = cloudDoc.data().data;
+      hadSampleBookingsInCloud = Array.isArray(cloudData?.bookings)
+        && cloudData.bookings.some(b => SAMPLE_BOOKING_IDS.has(String(b?.id || '')));
 
       if (cloudData) {
 
         cloudApplying = true;
 
-        data = {
-          ...clone(seed),
-          ...cloudData
-        };
+        data = removeSampleBookings(cloudData);
 
         localStorage.setItem(
           STORAGE_KEY,
@@ -165,6 +182,12 @@ async function loadCloudData() {
 
     cloudSyncReady = true;
 
+    // Persist removal of only the known sample booking IDs to Firestore.
+    // All other existing bookings and records remain unchanged.
+    if (hadSampleBookingsInCloud) {
+      await saveToCloud();
+    }
+
     // ===============================
     // REAL-TIME FIRESTORE LISTENER
     // ===============================
@@ -181,10 +204,7 @@ async function loadCloudData() {
 
         cloudApplying = true;
 
-        data = {
-          ...clone(seed),
-          ...cloudData
-        };
+        data = removeSampleBookings(cloudData);
 
         localStorage.setItem(
           STORAGE_KEY,
@@ -1992,7 +2012,19 @@ async function loadCloudData() {
     const values=[members.length,active,money(income),money(expenses),money(income-expenses),expiring];
     const cards=[...document.querySelectorAll('.stats-grid .stat-card')]; cards.forEach((c,i)=>{const s=c.querySelector('strong');if(s)s.textContent=values[i]??s.textContent;});
     const bookingsPanel=[...document.querySelectorAll('.panel')].find(p=>p.querySelector('h2')?.textContent.trim()==='Bookings');
-    if(bookingsPanel){const rows=bookingsPanel.querySelectorAll('.list-row');const bs=data.bookings.filter(b=>b.date===isoToday); rows.forEach((r,i)=>{const b=bs[i];if(b){const time=r.querySelector('span');if(time)time.textContent=formatTime(b.time);const strong=r.querySelector('strong');if(strong)strong.textContent=b.type;const small=r.querySelector('small');if(small)small.textContent=b.member;const badge=r.querySelector('.badge');if(badge){badge.textContent=b.status;badge.className=`badge ${statusClass(b.status)}`;}}});}
+    if(bookingsPanel){
+      const heading=bookingsPanel.querySelector('.panel-heading');
+      if(heading){
+        // Remove hard-coded dashboard demo rows; render only saved bookings for today.
+        bookingsPanel.querySelectorAll('.list-row').forEach(row=>row.remove());
+        bookingsPanel.querySelectorAll('.if-empty[data-dashboard-bookings-empty]').forEach(row=>row.remove());
+        const bs=data.bookings
+          .filter(b=>b.date===isoToday && String(b.status||'').toLowerCase()!=='cancelled')
+          .sort((a,b)=>String(a.time||'').localeCompare(String(b.time||'')));
+        const html=bs.length ? bs.map(b=>`<div class="list-row"><span>${formatTime(b.time)}</span><div><b>${esc(b.type||'Booking')}</b><small>${esc(b.member||'—')}</small></div><span class="badge ${statusClass(b.status)}">${esc(b.status||'Confirmed')}</span></div>`).join('') : '<div class="if-empty" data-dashboard-bookings-empty>No bookings scheduled for today.</div>';
+        heading.insertAdjacentHTML('afterend',html);
+      }
+    }
     renderFinanceChart();
     renderMembershipDonut();
     const chartSelect=document.querySelector('.chart-panel select');
@@ -2257,36 +2289,9 @@ async function loadCloudData() {
     loadCloudData().then(() => { cloudSyncReady = true; });
   });
 
-
-  // Mobile navigation: keep the menu collapsed until requested.
-  function setupMobileMenu(){
-    const toggle = document.querySelector('.mobile-menu-toggle');
-    const nav = document.querySelector('.sidebar-nav');
-    if (!toggle || !nav || toggle.dataset.menuReady === 'true') return;
-    toggle.dataset.menuReady = 'true';
-
-    const closeMenu = () => {
-      nav.classList.remove('mobile-menu-open');
-      toggle.setAttribute('aria-expanded', 'false');
-      toggle.querySelector('span:last-child').textContent = 'Menu';
-    };
-    toggle.addEventListener('click', () => {
-      const isOpen = nav.classList.toggle('mobile-menu-open');
-      toggle.setAttribute('aria-expanded', String(isOpen));
-      toggle.querySelector('span:last-child').textContent = isOpen ? 'Close menu' : 'Menu';
-    });
-    nav.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', closeMenu);
-    });
-    window.addEventListener('resize', () => {
-      if (window.innerWidth > 900) closeMenu();
-    });
-  }
-
   function init(){
     injectUIStyles();
     setupHeader();
-    setupMobileMenu();
     setupProfilePhoto();
     setupGlobalSearch();
     renderCurrentPage();
