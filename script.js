@@ -1630,7 +1630,7 @@ async function loadCloudData() {
         oscillator.type = 'sine';
         oscillator.frequency.value = kind === 'checkout' ? 880 : 660;
         gain.gain.setValueAtTime(0.0001, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.35, ctx.currentTime + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.7, ctx.currentTime + 0.015);
         gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.18);
         oscillator.connect(gain); gain.connect(ctx.destination);
         oscillator.start(); oscillator.stop(ctx.currentTime + 0.19);
