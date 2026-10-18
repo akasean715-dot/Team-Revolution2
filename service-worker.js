@@ -1,12 +1,22 @@
-const CACHE_NAME = "team-revolution-v2";
+const CACHE_NAME = "team-revolution-v2-auth";
 
 const APP_FILES = [
   "./",
   "./index.html",
   "./style.css",
   "./script.js",
-  "./firebase-connection.js",
   "./firebase-config.js",
+  "./firebase-connection.js",
+  "./auth-gate.js",
+  "./attendance.html",
+  "./bookings.html",
+  "./finance.html",
+  "./members.html",
+  "./memberships.html",
+  "./member-profile.html",
+  "./reports.html",
+  "./settings.html",
+  "./trainers.html",
   "./manifest.json",
   "./assets/tribal-logo-192.png",
   "./assets/tribal-logo-512.png"

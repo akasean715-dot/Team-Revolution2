@@ -12,6 +12,7 @@
 </head>
 <body>
 
+
     <div class="app-shell">
         <aside class="sidebar">
             <a class="brand tca-brand" href="index.html">
@@ -81,7 +82,7 @@
 
         <section class="dashboard-grid">
             <article class="panel chart-panel">
-                <div class="panel-heading"><div><span class="eyebrow">FINANCE</span><h2>Income vs Expenses</h2></div><select><option>Last 3 Months</option><option>This Month</option><option>Last 6 Months</option></select></div>
+                <div class="panel-heading"><div><span class="eyebrow">FINANCE</span><h2>Income vs Expenses</h2></div><select><option>This Month</option><option>Last 3 Months</option><option>Last 6 Months</option></select></div>
                 <div class="chart-placeholder">Income & Expense Chart</div>
             </article>
 
@@ -126,8 +127,8 @@
 
 
 <script src="firebase-connection.js"></script>
+<script src="auth-gate.js"></script>
 <script src="script.js"></script>
-
 <script>
   if ("serviceWorker" in navigator) {
     window.addEventListener("load", () => {
