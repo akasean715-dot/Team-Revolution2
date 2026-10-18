@@ -2297,3 +2297,30 @@ input:focus,select:focus,textarea:focus{
         display: none !important;
     }
 }
+
+/* Mobile: keep the notification button visible in the top bar */
+@media screen and (max-width: 900px) {
+    .topbar {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: space-between !important;
+        gap: 8px !important;
+    }
+
+    .topbar-user {
+        display: flex !important;
+        align-items: center !important;
+        gap: 8px !important;
+        flex-shrink: 0 !important;
+    }
+
+    .topbar-user .icon-btn {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        flex-shrink: 0 !important;
+        visibility: visible !important;
+        opacity: 1 !important;
+    }
+}
+
