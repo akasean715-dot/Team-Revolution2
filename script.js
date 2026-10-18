@@ -777,14 +777,62 @@ async function loadCloudData() {
 
     render();
 
+    // Use an explicit open/close state so the notification panel works on touch screens too.
+    notif.setAttribute('aria-haspopup','dialog');
+    notif.setAttribute('aria-expanded','false');
+    notif.setAttribute('type','button');
+
+    const setNotificationPanelOpen = (open) => {
+      if(!panel) return;
+      panel.hidden = !open;
+      panel.style.display = open ? 'block' : 'none';
+      notif.setAttribute('aria-expanded', open ? 'true' : 'false');
+
+      // On phones, anchor the panel to the button but keep it inside the viewport.
+      if(open && window.matchMedia('(max-width: 900px)').matches){
+        const rect = notif.getBoundingClientRect();
+        panel.style.position = 'fixed';
+        panel.style.top = `${Math.min(rect.bottom + 8, window.innerHeight - 120)}px`;
+        panel.style.right = `${Math.max(12, window.innerWidth - rect.right)}px`;
+        panel.style.left = 'auto';
+        panel.style.width = 'min(390px, calc(100vw - 24px))';
+        panel.style.maxHeight = `calc(100vh - ${Math.min(rect.bottom + 20, window.innerHeight - 80)}px)`;
+        panel.style.zIndex = '10001';
+      } else if(!open){
+        panel.style.display = 'none';
+      } else {
+        panel.style.position = '';
+        panel.style.top = '';
+        panel.style.right = '';
+        panel.style.left = '';
+        panel.style.width = '';
+        panel.style.maxHeight = '';
+        panel.style.zIndex = '';
+      }
+    };
+
     notif.addEventListener('click',e=>{
+      e.preventDefault();
       e.stopPropagation();
-      panel.hidden=!panel.hidden;
+      setNotificationPanelOpen(panel.hidden);
       if(!panel.hidden) render();
     });
 
     document.addEventListener('click',e=>{
-      if(parent && !parent.contains(e.target) && panel) panel.hidden=true;
+      if(parent && !parent.contains(e.target) && panel && !panel.hidden){
+        setNotificationPanelOpen(false);
+      }
+    });
+
+    document.addEventListener('keydown',e=>{
+      if(e.key === 'Escape' && panel && !panel.hidden){
+        setNotificationPanelOpen(false);
+        notif.focus();
+      }
+    });
+
+    window.addEventListener('resize',()=>{
+      if(panel && !panel.hidden) setNotificationPanelOpen(true);
     });
 
     // Re-render after data-changing actions and after page load.
