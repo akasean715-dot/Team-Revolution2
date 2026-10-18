@@ -1636,7 +1636,7 @@ const playChime = (frequency, startTime, duration) => {
   oscillator.frequency.setValueAtTime(frequency, startTime);
 
   gain.gain.setValueAtTime(0.0001, startTime);
-  gain.gain.exponentialRampToValueAtTime(0.5, startTime + 0.015);
+  gain.gain.exponentialRampToValueAtTime(1.0, startTime + 0.015);
   gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
 
   oscillator.connect(gain);
