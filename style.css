@@ -2035,3 +2035,142 @@ input:focus,select:focus,textarea:focus{
   background:linear-gradient(145deg,#fff,#d9d9d9) !important;
   box-shadow:0 0 0 1px rgba(255,255,255,.1),0 8px 24px rgba(255,255,255,.06) !important;
 }
+
+
+/* =========================================================
+   MOBILE LAYOUT FIX — ALL APP PAGES
+   Keep the complete sidebar navigation above page content,
+   with Settings last, on mobile/tablet only.
+   Desktop layout is intentionally unchanged.
+   ========================================================= */
+@media (max-width: 900px) {
+    body:has(.app-shell) .app-shell {
+        display: block !important;
+        width: 100% !important;
+        min-height: 100vh;
+    }
+
+    body:has(.app-shell) .sidebar {
+        position: relative !important;
+        inset: auto !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: 0 !important;
+        padding: 14px 12px 12px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        border-right: 0 !important;
+        border-bottom: 1px solid rgba(255,255,255,.08) !important;
+        z-index: 20;
+    }
+
+    body:has(.app-shell) .brand {
+        flex: 0 0 auto !important;
+        padding: 2px 8px 14px !important;
+        margin: 0 !important;
+    }
+
+    /* All navigation links are visible in two columns, with
+       Settings at the end, before the page's topbar/content. */
+    body:has(.app-shell) .sidebar-nav {
+        display: grid !important;
+        width: 100% !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 4px 6px !important;
+        margin: 0 !important;
+    }
+
+    body:has(.app-shell) .sidebar-nav .nav-label {
+        grid-column: 1 / -1 !important;
+    }
+
+    body:has(.app-shell) .sidebar-nav a {
+        width: 100% !important;
+        min-width: 0 !important;
+        min-height: 42px !important;
+        padding: 0 10px !important;
+        box-sizing: border-box !important;
+        font-size: 11px !important;
+        white-space: normal !important;
+    }
+
+    body:has(.app-shell) .sidebar-nav a::before {
+        flex: 0 0 5px !important;
+        margin-right: 8px !important;
+    }
+
+    body:has(.app-shell) .sidebar-promo {
+        display: none !important;
+    }
+
+    body:has(.app-shell) .main-content {
+        display: block !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+    }
+
+    body:has(.app-shell) .topbar {
+        position: relative !important;
+        top: auto !important;
+        width: 100% !important;
+        height: auto !important;
+        min-height: 62px !important;
+        padding: 10px 14px !important;
+        gap: 10px !important;
+    }
+
+    body:has(.app-shell) .search-box {
+        width: auto !important;
+        flex: 1 1 auto !important;
+        min-width: 0 !important;
+    }
+
+    body:has(.app-shell) .topbar-user {
+        flex: 0 0 auto !important;
+        gap: 7px !important;
+    }
+
+    body:has(.app-shell) .topbar-user > div:not(.user-avatar),
+    body:has(.app-shell) .topbar-user > span {
+        display: none !important;
+    }
+
+    body:has(.app-shell) .content {
+        width: 100% !important;
+        max-width: none !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+        padding: 20px 14px 30px !important;
+    }
+}
+
+@media (max-width: 520px) {
+    body:has(.app-shell) .sidebar {
+        padding: 12px 10px 10px !important;
+    }
+
+    body:has(.app-shell) .sidebar-nav {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 4px !important;
+    }
+
+    body:has(.app-shell) .sidebar-nav a {
+        min-height: 40px !important;
+        padding: 0 8px !important;
+        font-size: 10px !important;
+    }
+
+    body:has(.app-shell) .sidebar-nav a::before {
+        margin-right: 7px !important;
+    }
+
+    body:has(.app-shell) .topbar {
+        padding: 9px 12px !important;
+    }
+
+    body:has(.app-shell) .content {
+        padding: 18px 12px 26px !important;
+    }
+}
