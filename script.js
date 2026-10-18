@@ -1622,19 +1622,46 @@ async function loadCloudData() {
     const playSuccessFeedback = kind => {
       try { if (navigator.vibrate) navigator.vibrate(kind === 'checkout' ? [90, 45, 140] : [100]); } catch {}
       try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtx) return;
-        const ctx = new AudioCtx();
-        const oscillator = ctx.createOscillator();
-        const gain = ctx.createGain();
-        oscillator.type = 'sine';
-        oscillator.frequency.value = kind === 'checkout' ? 880 : 660;
-        gain.gain.setValueAtTime(0.0001, ctx.currentTime);
-        gain.gain.exponentialRampToValueAtTime(0.7, ctx.currentTime + 0.015);
-        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.18);
-        oscillator.connect(gain); gain.connect(ctx.destination);
-        oscillator.start(); oscillator.stop(ctx.currentTime + 0.19);
-        oscillator.onended = () => { try { ctx.close(); } catch {} };
+        
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+if (!AudioCtx) return;
+
+const ctx = new AudioCtx();
+
+const playChime = (frequency, startTime, duration) => {
+  const oscillator = ctx.createOscillator();
+  const gain = ctx.createGain();
+
+  oscillator.type = 'sine';
+  oscillator.frequency.setValueAtTime(frequency, startTime);
+
+  gain.gain.setValueAtTime(0.0001, startTime);
+  gain.gain.exponentialRampToValueAtTime(0.5, startTime + 0.015);
+  gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+  oscillator.connect(gain);
+  gain.connect(ctx.destination);
+
+  oscillator.start(startTime);
+  oscillator.stop(startTime + duration + 0.02);
+};
+
+const now = ctx.currentTime;
+
+if (kind === 'checkout') {
+  // Two bright notes for check-out: "cling-cling!"
+  playChime(1046.5, now, 0.18);
+  playChime(1318.5, now + 0.16, 0.28);
+} else {
+  // Two bright notes for check-in: "ting!"
+  playChime(1318.5, now, 0.12);
+  playChime(1760, now + 0.12, 0.3);
+}
+
+setTimeout(() => {
+  try { ctx.close(); } catch {}
+}, 800);
+
       } catch {}
     };
     const checkIn=value=>{
