@@ -2035,3 +2035,82 @@ input:focus,select:focus,textarea:focus{
   background:linear-gradient(145deg,#fff,#d9d9d9) !important;
   box-shadow:0 0 0 1px rgba(255,255,255,.1),0 8px 24px rgba(255,255,255,.06) !important;
 }
+
+
+/* =========================================================
+   MOBILE HAMBURGER NAVIGATION — MOBILE ONLY
+   Desktop sidebar and navigation remain unchanged.
+   ========================================================= */
+.mobile-menu-toggle {
+    display: none;
+}
+
+@media (max-width: 900px) {
+    .mobile-menu-toggle {
+        display: flex !important;
+        align-items: center;
+        justify-content: flex-start;
+        gap: 12px;
+        width: 100%;
+        min-height: 46px;
+        margin: 0 0 10px;
+        padding: 0 14px;
+        border: 1px solid rgba(255,255,255,.13);
+        border-radius: 10px;
+        background: #111214;
+        color: #f5f5f5;
+        font: inherit;
+        font-size: 14px;
+        font-weight: 600;
+        text-align: left;
+        cursor: pointer;
+        box-sizing: border-box;
+    }
+
+    .mobile-menu-toggle:focus-visible {
+        outline: 2px solid rgba(255,255,255,.65);
+        outline-offset: 2px;
+    }
+
+    .mobile-menu-icon {
+        display: inline-block;
+        font-size: 21px;
+        line-height: 1;
+    }
+
+    /* Hide the page links until the user opens the menu. */
+    .sidebar-nav {
+        display: none !important;
+        width: 100% !important;
+        grid-template-columns: minmax(0, 1fr) !important;
+        gap: 5px !important;
+        margin: 0 !important;
+    }
+
+    .sidebar-nav.mobile-menu-open {
+        display: grid !important;
+    }
+
+    .sidebar-nav .nav-label {
+        display: block !important;
+        padding: 8px 10px 5px !important;
+    }
+
+    .sidebar-nav a {
+        width: 100% !important;
+        min-height: 44px !important;
+        box-sizing: border-box !important;
+        white-space: normal !important;
+    }
+
+    /* Override the older dashboard-only mobile grid rules. */
+    body:has(.app-shell) .sidebar {
+        align-items: stretch !important;
+    }
+
+    body:has(.app-shell) .main-content {
+        width: 100% !important;
+        min-width: 0 !important;
+        margin-left: 0 !important;
+    }
+}

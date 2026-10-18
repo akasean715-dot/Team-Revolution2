@@ -2257,9 +2257,36 @@ async function loadCloudData() {
     loadCloudData().then(() => { cloudSyncReady = true; });
   });
 
+
+  // Mobile navigation: keep the menu collapsed until requested.
+  function setupMobileMenu(){
+    const toggle = document.querySelector('.mobile-menu-toggle');
+    const nav = document.querySelector('.sidebar-nav');
+    if (!toggle || !nav || toggle.dataset.menuReady === 'true') return;
+    toggle.dataset.menuReady = 'true';
+
+    const closeMenu = () => {
+      nav.classList.remove('mobile-menu-open');
+      toggle.setAttribute('aria-expanded', 'false');
+      toggle.querySelector('span:last-child').textContent = 'Menu';
+    };
+    toggle.addEventListener('click', () => {
+      const isOpen = nav.classList.toggle('mobile-menu-open');
+      toggle.setAttribute('aria-expanded', String(isOpen));
+      toggle.querySelector('span:last-child').textContent = isOpen ? 'Close menu' : 'Menu';
+    });
+    nav.querySelectorAll('a').forEach(link => {
+      link.addEventListener('click', closeMenu);
+    });
+    window.addEventListener('resize', () => {
+      if (window.innerWidth > 900) closeMenu();
+    });
+  }
+
   function init(){
     injectUIStyles();
     setupHeader();
+    setupMobileMenu();
     setupProfilePhoto();
     setupGlobalSearch();
     renderCurrentPage();
