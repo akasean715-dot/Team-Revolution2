@@ -1619,7 +1619,6 @@ async function loadCloudData() {
     };
     let processingScan=false;
     const checkIn=value=>{
-      if(processingScan) return;
       const id=parseMemberId(value);
       if(!id) return showResult('Enter or scan a member ID.');
       const member=data.members.find(m=>String(m.id).toLowerCase()===id.toLowerCase() || String(m.id).toLowerCase()===id.replace(/^teamrevolution\|/i,'').toLowerCase());
