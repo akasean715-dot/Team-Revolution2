@@ -1618,28 +1618,67 @@ async function loadCloudData() {
       return raw;
     };
     let processingScan=false;
+    const lastSuccessfulScanByMember = new Map();
+    const playSuccessFeedback = kind => {
+      try { if (navigator.vibrate) navigator.vibrate(kind === 'checkout' ? [90, 45, 140] : [100]); } catch {}
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const oscillator = ctx.createOscillator();
+        const gain = ctx.createGain();
+        oscillator.type = 'sine';
+        oscillator.frequency.value = kind === 'checkout' ? 880 : 660;
+        gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.12, ctx.currentTime + 0.015);
+        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.18);
+        oscillator.connect(gain); gain.connect(ctx.destination);
+        oscillator.start(); oscillator.stop(ctx.currentTime + 0.19);
+        oscillator.onended = () => { try { ctx.close(); } catch {} };
+      } catch {}
+    };
     const checkIn=value=>{
       const id=parseMemberId(value);
       if(!id) return showResult('Enter or scan a member ID.');
       const member=data.members.find(m=>String(m.id).toLowerCase()===id.toLowerCase() || String(m.id).toLowerCase()===id.replace(/^teamrevolution\|/i,'').toLowerCase());
       if(!member || memberIsArchived(member)) return showResult('Member not found or archived. Please check the member record.');
+      const memberKey=String(member.id).toLowerCase();
+      const lastSuccess=lastSuccessfulScanByMember.get(memberKey)||0;
+      if(Date.now()-lastSuccess<3000){
+        const resultEl=document.querySelector('#teamrev-qr-result');
+        if(resultEl){resultEl.textContent=`${member.name}: scan received. Please move the QR code away briefly before scanning again.`;resultEl.style.color='#e8b75a';}
+        return;
+      }
       const now=new Date();
       const time=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
-      const attendanceToday=data.attendance.filter(a=>a.date===isoToday && (String(a.memberId||'').toLowerCase()===String(member.id).toLowerCase() || String(a.member||'').toLowerCase()===String(member.name||'').toLowerCase()));
-      // If the member has an open session today, the next scan records check-out.
+      const attendanceToday=data.attendance.filter(a=>a.date===isoToday && (String(a.memberId||'').toLowerCase()===memberKey || String(a.member||'').toLowerCase()===String(member.name||'').toLowerCase()));
+      // An open visit can only be checked out after this member's 3-minute cooldown.
       const openSession=attendanceToday.find(a=>!a.checkOut);
       if(openSession){
-        const [inHour,inMinute]=String(openSession.checkIn||'00:00').split(':').map(Number);
-        const [outHour,outMinute]=time.split(':').map(Number);
-        const minutes=Math.max(0,(outHour*60+outMinute)-(inHour*60+inMinute));
+        let checkInMs=Number(openSession.checkInAt ? new Date(openSession.checkInAt).getTime() : NaN);
+        if(!Number.isFinite(checkInMs)) checkInMs=new Date(`${openSession.date}T${String(openSession.checkIn||'00:00').slice(0,5)}:00`).getTime();
+        const elapsedMs=Math.max(0,now.getTime()-checkInMs);
+        const cooldownMs=3*60*1000;
+        if(elapsedMs<cooldownMs){
+          const remainingSeconds=Math.ceil((cooldownMs-elapsedMs)/1000);
+          const remainingMinutes=Math.floor(remainingSeconds/60);
+          const seconds=remainingSeconds%60;
+          const resultEl=document.querySelector('#teamrev-qr-result');
+          if(resultEl){resultEl.textContent=`${member.name} is checked in. Check-out will be available in ${remainingMinutes ? remainingMinutes+'m ' : ''}${seconds}s.`;resultEl.style.color='#e8b75a';}
+          return;
+        }
+        const minutes=Math.max(0,Math.floor(elapsedMs/60000));
         openSession.checkOut=time;
+        openSession.checkOutAt=now.toISOString();
         openSession.duration=minutes>=60?`${Math.floor(minutes/60)}h ${minutes%60}m`:`${minutes}m`;
         openSession.status='Present';
         save();
         renderAttendance();
+        lastSuccessfulScanByMember.set(memberKey,Date.now());
         const newResult=document.querySelector('#teamrev-qr-result');
         if(newResult){newResult.textContent=`CHECK-OUT SUCCESSFUL — ${member.name} (${member.id}) left at ${formatTime(time)}. Workout: ${openSession.duration}.`;newResult.style.color='#35d39b';}
         const input=document.querySelector('#teamrev-member-code');if(input)input.value='';
+        playSuccessFeedback('checkout');
         return;
       }
       const expiredByDate=!!member.expiry && member.expiry < isoToday;
@@ -1649,15 +1688,16 @@ async function loadCloudData() {
         renderAttendance();
         return showResult(`ACCESS DENIED — ${member.name}'s membership has expired${member.expiry?' on '+fmtDate(member.expiry):''}. Renew the membership before check-in.`);
       }
-      // A completed session exists today: do not accidentally create a second visit from a duplicate scan.
-      if(attendanceToday.some(a=>!!a.checkOut)) return showResult(`${member.name} has already checked in and checked out today. No new visit was recorded.`);
-      const record={id:'AT-'+Date.now(),memberId:member.id,member:member.name,date:isoToday,checkIn:time,checkOut:'',duration:'—',plan:member.plan||'Membership',status:'Present'};
+      // A completed visit does not block another visit later the same day.
+      const record={id:'AT-'+Date.now(),memberId:member.id,member:member.name,date:isoToday,checkIn:time,checkInAt:now.toISOString(),checkOut:'',checkOutAt:'',duration:'—',plan:member.plan||'Membership',status:'Present'};
       data.attendance.unshift(record);
       save();
       renderAttendance();
+      lastSuccessfulScanByMember.set(memberKey,Date.now());
       const newResult=document.querySelector('#teamrev-qr-result');
-      if(newResult){newResult.textContent=`CHECK-IN SUCCESSFUL — ${member.name} (${member.id}) arrived at ${formatTime(time)}. Scan again when they leave.`;newResult.style.color='#35d39b';}
+      if(newResult){newResult.textContent=`CHECK-IN SUCCESSFUL — ${member.name} (${member.id}) arrived at ${formatTime(time)}. Check-out unlocks in 3 minutes.`;newResult.style.color='#35d39b';}
       const input=document.querySelector('#teamrev-member-code');if(input)input.value='';
+      playSuccessFeedback('checkin');
     };
     panel.querySelector('#teamrev-manual-qr-checkin').onclick=()=>checkIn(panel.querySelector('#teamrev-member-code').value);
     panel.querySelector('#teamrev-member-code').addEventListener('keydown',e=>{if(e.key==='Enter')checkIn(e.currentTarget.value);});
@@ -1682,7 +1722,7 @@ async function loadCloudData() {
           processingScan=true;
           scanner.pause(true);
           checkIn(decodedText);
-          setTimeout(()=>{processingScan=false;try{scanner.resume()}catch{}},1800);
+          setTimeout(()=>{processingScan=false;try{scanner.resume()}catch{}},2200);
         },()=>{});
         start.disabled=true;stop.disabled=false;
         showResult('Camera active. Point it at a member QR code.',true);
