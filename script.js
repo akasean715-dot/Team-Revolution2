@@ -777,62 +777,14 @@ async function loadCloudData() {
 
     render();
 
-    // Use an explicit open/close state so the notification panel works on touch screens too.
-    notif.setAttribute('aria-haspopup','dialog');
-    notif.setAttribute('aria-expanded','false');
-    notif.setAttribute('type','button');
-
-    const setNotificationPanelOpen = (open) => {
-      if(!panel) return;
-      panel.hidden = !open;
-      panel.style.display = open ? 'block' : 'none';
-      notif.setAttribute('aria-expanded', open ? 'true' : 'false');
-
-      // On phones, anchor the panel to the button but keep it inside the viewport.
-      if(open && window.matchMedia('(max-width: 900px)').matches){
-        const rect = notif.getBoundingClientRect();
-        panel.style.position = 'fixed';
-        panel.style.top = `${Math.min(rect.bottom + 8, window.innerHeight - 120)}px`;
-        panel.style.right = `${Math.max(12, window.innerWidth - rect.right)}px`;
-        panel.style.left = 'auto';
-        panel.style.width = 'min(390px, calc(100vw - 24px))';
-        panel.style.maxHeight = `calc(100vh - ${Math.min(rect.bottom + 20, window.innerHeight - 80)}px)`;
-        panel.style.zIndex = '10001';
-      } else if(!open){
-        panel.style.display = 'none';
-      } else {
-        panel.style.position = '';
-        panel.style.top = '';
-        panel.style.right = '';
-        panel.style.left = '';
-        panel.style.width = '';
-        panel.style.maxHeight = '';
-        panel.style.zIndex = '';
-      }
-    };
-
     notif.addEventListener('click',e=>{
-      e.preventDefault();
       e.stopPropagation();
-      setNotificationPanelOpen(panel.hidden);
+      panel.hidden=!panel.hidden;
       if(!panel.hidden) render();
     });
 
     document.addEventListener('click',e=>{
-      if(parent && !parent.contains(e.target) && panel && !panel.hidden){
-        setNotificationPanelOpen(false);
-      }
-    });
-
-    document.addEventListener('keydown',e=>{
-      if(e.key === 'Escape' && panel && !panel.hidden){
-        setNotificationPanelOpen(false);
-        notif.focus();
-      }
-    });
-
-    window.addEventListener('resize',()=>{
-      if(panel && !panel.hidden) setNotificationPanelOpen(true);
+      if(parent && !parent.contains(e.target) && panel) panel.hidden=true;
     });
 
     // Re-render after data-changing actions and after page load.
@@ -1646,12 +1598,12 @@ async function loadCloudData() {
     panel.style.marginBottom='14px';
     panel.innerHTML=`
       <div class="panel-heading"><div><span class="eyebrow">QUICK CHECK-IN</span><h2>QR Code Attendance</h2></div><span class="badge success">Membership verification</span></div>
-      <p style="color:#8f969f;font-size:11px;margin:0 0 14px">Scan a member's QR code with the camera, or enter their member ID manually. Expired memberships are rejected.</p>
+      <p style="color:#8f969f;font-size:11px;margin:0 0 14px">Scan a member's QR code once on arrival to check in, then scan it again when they leave to check out. Expired memberships are rejected for new check-ins.</p>
       <div style="display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-bottom:12px">
         <button type="button" class="btn btn-primary" id="teamrev-start-qr-camera">Start Camera Scanner</button>
         <button type="button" class="btn btn-secondary" id="teamrev-stop-qr-camera" disabled>Stop Scanner</button>
         <input id="teamrev-member-code" placeholder="Enter member ID (e.g. MEM-0012)" style="flex:1;min-width:210px">
-        <button type="button" class="btn btn-secondary" id="teamrev-manual-qr-checkin">Check In</button>
+        <button type="button" class="btn btn-secondary" id="teamrev-manual-qr-checkin">Check In / Out</button>
       </div>
       <div id="teamrev-qr-reader" style="max-width:440px;width:100%;"></div>
       <div id="teamrev-qr-result" role="status" aria-live="polite" style="font-size:12px;margin-top:10px;color:#aeb7be"></div>`;
@@ -1665,11 +1617,32 @@ async function loadCloudData() {
       if(raw.startsWith('TEAMREVOLUTION|')) return raw.slice('TEAMREVOLUTION|'.length).trim();
       return raw;
     };
+    let processingScan=false;
     const checkIn=value=>{
+      if(processingScan) return;
       const id=parseMemberId(value);
       if(!id) return showResult('Enter or scan a member ID.');
       const member=data.members.find(m=>String(m.id).toLowerCase()===id.toLowerCase() || String(m.id).toLowerCase()===id.replace(/^teamrevolution\|/i,'').toLowerCase());
       if(!member || memberIsArchived(member)) return showResult('Member not found or archived. Please check the member record.');
+      const now=new Date();
+      const time=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+      const attendanceToday=data.attendance.filter(a=>a.date===isoToday && (String(a.memberId||'').toLowerCase()===String(member.id).toLowerCase() || String(a.member||'').toLowerCase()===String(member.name||'').toLowerCase()));
+      // If the member has an open session today, the next scan records check-out.
+      const openSession=attendanceToday.find(a=>!a.checkOut);
+      if(openSession){
+        const [inHour,inMinute]=String(openSession.checkIn||'00:00').split(':').map(Number);
+        const [outHour,outMinute]=time.split(':').map(Number);
+        const minutes=Math.max(0,(outHour*60+outMinute)-(inHour*60+inMinute));
+        openSession.checkOut=time;
+        openSession.duration=minutes>=60?`${Math.floor(minutes/60)}h ${minutes%60}m`:`${minutes}m`;
+        openSession.status='Present';
+        save();
+        renderCurrentPage();
+        const newResult=document.querySelector('#teamrev-qr-result');
+        if(newResult){newResult.textContent=`CHECK-OUT SUCCESSFUL — ${member.name} (${member.id}) left at ${formatTime(time)}. Workout: ${openSession.duration}.`;newResult.style.color='#35d39b';}
+        const input=document.querySelector('#teamrev-member-code');if(input)input.value='';
+        return;
+      }
       const expiredByDate=!!member.expiry && member.expiry < isoToday;
       if(expiredByDate || String(member.status||'').toLowerCase()==='expired'){
         member.status='Expired';
@@ -1677,16 +1650,14 @@ async function loadCloudData() {
         renderCurrentPage();
         return showResult(`ACCESS DENIED — ${member.name}'s membership has expired${member.expiry?' on '+fmtDate(member.expiry):''}. Renew the membership before check-in.`);
       }
-      const duplicate=data.attendance.find(a=>a.date===isoToday && String(a.memberId||'')===String(member.id));
-      const duplicateByName=data.attendance.find(a=>a.date===isoToday && String(a.member||'').toLowerCase()===String(member.name||'').toLowerCase());
-      if(duplicate || duplicateByName) return showResult(`${member.name} is already checked in today.`);
-      const now=new Date();
-      const checkInTime=String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
-      data.attendance.unshift({id:'AT-'+Date.now(),memberId:member.id,member:member.name,date:isoToday,checkIn:checkInTime,checkOut:'',duration:'—',plan:member.plan||'Membership',status:'Present'});
+      // A completed session exists today: do not accidentally create a second visit from a duplicate scan.
+      if(attendanceToday.some(a=>!!a.checkOut)) return showResult(`${member.name} has already checked in and checked out today. No new visit was recorded.`);
+      const record={id:'AT-'+Date.now(),memberId:member.id,member:member.name,date:isoToday,checkIn:time,checkOut:'',duration:'—',plan:member.plan||'Membership',status:'Present'};
+      data.attendance.unshift(record);
       save();
       renderCurrentPage();
       const newResult=document.querySelector('#teamrev-qr-result');
-      if(newResult){newResult.textContent=`CHECK-IN SUCCESSFUL — ${member.name} (${member.id}) recorded at ${formatTime(checkInTime)}.`;newResult.style.color='#35d39b';}
+      if(newResult){newResult.textContent=`CHECK-IN SUCCESSFUL — ${member.name} (${member.id}) arrived at ${formatTime(time)}. Scan again when they leave.`;newResult.style.color='#35d39b';}
       const input=document.querySelector('#teamrev-member-code');if(input)input.value='';
     };
     panel.querySelector('#teamrev-manual-qr-checkin').onclick=()=>checkIn(panel.querySelector('#teamrev-member-code').value);
@@ -1708,9 +1679,11 @@ async function loadCloudData() {
         const scanner=new Html5Qrcode('teamrev-qr-reader');
         window.__teamRevHtml5Scanner=scanner;
         await scanner.start({facingMode:'environment'},{fps:10,qrbox:{width:230,height:230}},decodedText=>{
-          checkIn(decodedText);
+          if(processingScan) return;
+          processingScan=true;
           scanner.pause(true);
-          setTimeout(()=>{try{scanner.resume()}catch{}},1800);
+          checkIn(decodedText);
+          setTimeout(()=>{processingScan=false;try{scanner.resume()}catch{}},1800);
         },()=>{});
         start.disabled=true;stop.disabled=false;
         showResult('Camera active. Point it at a member QR code.',true);
