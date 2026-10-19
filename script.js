@@ -2133,13 +2133,63 @@ setTimeout(() => {
   }
 
   function renderProfile(){
-    const params=new URLSearchParams(location.search); const id=params.get('member'); let member=data.members.find(m=>m.id===id) || data.members.find(m=>m.name==='Ananya Singh') || data.members[0]; if(!member)return;
-    const h=document.querySelector('.page-header h1'); if(h)h.textContent=member.name;
-    const profileName=[...document.querySelectorAll('h2')].find(x=>x.textContent.trim()==='Ananya Singh'); if(profileName)profileName.textContent=member.name;
-    const badge=document.querySelector('.profile-card .badge'); if(badge){badge.textContent=member.status;badge.className=`badge ${statusClass(member.status)}`;}
-    const edit=document.querySelector('.page-actions .btn-primary'); if(edit){edit.onclick=()=>memberModal(member);}
-    const payment=[...document.querySelectorAll('.page-actions button')].find(b=>b.textContent.includes('Record Payment')); if(payment)payment.onclick=()=>paymentModal(member);
-    document.querySelectorAll('.action-card').forEach(a=>{if(a.textContent.includes('Make Payment'))a.onclick=e=>{e.preventDefault();paymentModal(member)}; if(a.textContent.includes('Renew'))a.onclick=e=>{e.preventDefault();member.status='Active';member.expiry='2026-10-19';save();renderCurrentPage();toast('Membership renewed for 30 days.')}});
+    const params = new URLSearchParams(location.search);
+    const id = params.get('member');
+    // Never silently show another member's sample profile when the requested ID is missing.
+    const member = data.members.find(m => String(m.id) === String(id));
+    const content = document.querySelector('.content');
+    if (!member) {
+      if (content) content.innerHTML = '<section class="panel"><h2>Member not found</h2><p>The requested member could not be found. Please return to the Members page and select a member.</p><a class="btn btn-primary" href="members.html">Back to Members</a></section>';
+      return;
+    }
+    const h = document.querySelector('.page-header h1');
+    if (h) h.textContent = member.name || 'Member Profile';
+    const idLine = document.querySelector('.page-header p');
+    if (idLine) idLine.textContent = `Member ID: ${member.id || '—'}`;
+    const profileName = document.querySelector('.profile-card h2');
+    if (profileName) profileName.textContent = member.name || '—';
+    const avatar = document.querySelector('.profile-card .avatar');
+    if (avatar) avatar.textContent = String(member.name || 'M').trim().split(/\s+/).slice(0,2).map(x=>x[0]||'').join('').toUpperCase();
+    const profileCard = document.querySelector('.profile-card');
+    if (profileCard) {
+      const ps = profileCard.querySelectorAll('p');
+      if (ps[0]) ps[0].textContent = member.phone ? (String(member.phone).startsWith('+') ? member.phone : `+91 ${member.phone}`) : 'No phone number';
+      if (ps[1]) ps[1].textContent = member.email || 'No email address';
+    }
+    const badge = document.querySelector('.profile-card .badge');
+    if (badge) { badge.textContent = member.status || 'Unknown'; badge.className = `badge ${statusClass(member.status || '')}`; }
+    const detailGrid = document.querySelector('.detail-grid');
+    if (detailGrid) {
+      const values = [
+        member.plan || '—',
+        fmtDate(member.start),
+        fmtDate(member.expiry),
+        money(member.amountPaid ?? member.amount ?? 0),
+        member.paymentStatus || (member.status === 'Active' ? 'Check records' : '—'),
+        member.trainer || '—'
+      ];
+      detailGrid.querySelectorAll('span').forEach((span, i) => {
+        const b = span.querySelector('b');
+        if (b && values[i] !== undefined) b.textContent = values[i];
+      });
+    }
+    const edit = document.querySelector('.page-actions .btn-secondary');
+    if (edit) edit.onclick = () => memberModal(member);
+    const payment = [...document.querySelectorAll('.page-actions button')].find(b => b.textContent.includes('Record Payment'));
+    if (payment) payment.onclick = () => paymentModal(member);
+    document.querySelectorAll('.action-card').forEach(a => {
+      if (a.textContent.includes('Make Payment')) a.onclick = e => { e.preventDefault(); paymentModal(member); };
+      if (a.textContent.includes('Renew')) a.onclick = e => {
+        e.preventDefault();
+        const start = new Date();
+        const startISO = `${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,'0')}-${String(start.getDate()).padStart(2,'0')}`;
+        const end = new Date(start.getFullYear(), start.getMonth()+1, start.getDate());
+        member.status = 'Active';
+        member.start = startISO;
+        member.expiry = `${end.getFullYear()}-${String(end.getMonth()+1).padStart(2,'0')}-${String(end.getDate()).padStart(2,'0')}`;
+        save(); renderCurrentPage(); toast('Membership renewed for one month.');
+      };
+    });
   }
 
   function setupButtons(){
