@@ -1,4 +1,4 @@
-const CACHE_NAME = "team-revolution-v2-auth";
+const CACHE_NAME = "team-revolution-v3-invoices";
 
 const APP_FILES = [
   "./",
@@ -11,6 +11,7 @@ const APP_FILES = [
   "./attendance.html",
   "./bookings.html",
   "./finance.html",
+  "./invoices.html",
   "./members.html",
   "./memberships.html",
   "./member-profile.html",

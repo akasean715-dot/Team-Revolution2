@@ -23,6 +23,7 @@
       { id:'PLAN-PREMIUM', name:'Premium', price:3000, duration:'1 Month', members:58, featured:false },
       { id:'PLAN-ANNUAL', name:'Annual', price:24000, duration:'12 Months', members:31, featured:false }
     ],
+    invoices: [],
     transactions: [
       { id:'TX-1001', date:'2026-09-19', description:'Rahul Sharma — Membership', category:'Membership', type:'Income', amount:2500, status:'Paid' },
       { id:'TX-1002', date:'2026-09-18', description:'Electricity Bill', category:'Utilities', type:'Expense', amount:8400, status:'Paid' },
@@ -51,6 +52,8 @@
     const cleaned = { ...clone(seed), ...(source || {}) };
     const bookings = Array.isArray(cleaned.bookings) ? cleaned.bookings : [];
     cleaned.bookings = bookings.filter(b => !SAMPLE_BOOKING_IDS.has(String(b?.id || '')));
+    if (!Array.isArray(cleaned.invoices)) cleaned.invoices = [];
+    if (!Array.isArray(cleaned.transactions)) cleaned.transactions = [];
     return cleaned;
   }
   function loadData() {
@@ -2134,6 +2137,8 @@ setTimeout(() => {
       if(text==='+ Add Member') el.onclick=e=>{e.preventDefault();memberModal();};
       if(text==='+ Add Booking') el.onclick=e=>{e.preventDefault();bookingModal();};
       if(text==='+ Add Transaction') el.onclick=e=>{e.preventDefault();transactionModal('Income');};
+      if(text==='+ Create Invoice') el.onclick=e=>{e.preventDefault();invoiceModal();};
+      if(text==='Export Invoices') el.onclick=e=>{e.preventDefault();exportInvoices();};
       if(text==='+ Income') el.onclick=e=>{e.preventDefault();transactionModal('Income');};
       if(text==='+ Expense') el.onclick=e=>{e.preventDefault();transactionModal('Expense');};
       if(text==='+ Add Trainer') el.onclick=e=>{e.preventDefault();trainerModal();};
@@ -2373,9 +2378,143 @@ setTimeout(() => {
     holder.innerHTML=`<div class="if-empty"><strong>${esc(reportMonthLabel(month))}</strong><div style="margin-top:14px">${values.map(([label,value])=>{const width=Math.max(3,Math.round(Math.abs(value)/max*100));return `<div style="margin:10px 0"><div style="display:flex;justify-content:space-between;gap:12px;margin-bottom:5px"><span>${esc(label)}</span><strong>${label.includes('Members')||label==='Attendance'||label==='Bookings'?Number(value).toLocaleString('en-IN'):money(value)}</strong></div><div style="height:7px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden"><span style="display:block;height:100%;width:${width}%;background:currentColor;border-radius:99px"></span></div></div>`;}).join('')}</div></div>`;
   }
 
+
+  // Invoice records live in the same saved gym data object as members and transactions,
+  // so they follow the existing local save and authenticated Firestore sync behavior.
+  function nextInvoiceNumber(){
+    const year=new Date().getFullYear();
+    const count=data.invoices.filter(i=>String(i.number||'').startsWith(`INV-${year}-`)).length+1;
+    let number=`INV-${year}-${String(count).padStart(4,'0')}`;
+    while(data.invoices.some(i=>i.number===number)) number=`INV-${year}-${String(Number(number.split('-').pop())+1).padStart(4,'0')}`;
+    return number;
+  }
+  function effectiveInvoiceStatus(invoice){
+    if(invoice.status==='Paid') return 'Paid';
+    if(invoice.dueDate && invoice.dueDate < isoToday) return 'Overdue';
+    return 'Unpaid';
+  }
+  function invoiceStatusClass(status){
+    const s=String(status||'Unpaid').toLowerCase();
+    return s==='paid'?'success':s==='overdue'?'danger':'warning';
+  }
+  function createInvoiceTransaction(invoice){
+    if(invoice.status!=='Paid' || invoice.transactionId) return;
+    const tx={id:`TX-${Date.now()}-${Math.floor(Math.random()*1000)}`,date:invoice.paidDate||isoToday,
+      description:`Invoice ${invoice.number} — ${invoice.memberName}`,member:invoice.memberName,
+      category:invoice.category||'Membership',type:'Income',amount:Number(invoice.amount)||0,status:'Paid',
+      invoiceId:invoice.id};
+    data.transactions.unshift(tx);
+    invoice.transactionId=tx.id;
+    invoice.paidDate=tx.date;
+  }
+  function invoiceModal(existing=null){
+    const invoice=existing||{};
+    const memberOptions=activeMembers().map(m=>`<option value="${esc(m.id)}" ${invoice.memberId===m.id?'selected':''}>${esc(m.name)}${m.phone?' — '+esc(m.phone):''}</option>`).join('');
+    const wrap=modal(existing?'Edit Invoice':'Create Invoice',`<form class="if-form" id="invoice-form">
+      <label>Member<select name="memberId" required><option value="">Choose a member</option>${memberOptions}</select></label>
+      <label>Invoice date<input type="date" name="date" value="${esc(invoice.date||isoToday)}" required></label>
+      <label class="full">Description<input name="description" required maxlength="160" placeholder="e.g. Monthly membership fee" value="${esc(invoice.description||'Membership fee')}"></label>
+      <label>Category<select name="category">${['Membership','Training','Retail','Other'].map(c=>`<option ${invoice.category===c?'selected':''}>${c}</option>`).join('')}</select></label>
+      <label>Amount (₹)<input name="amount" type="number" min="1" step="0.01" required value="${invoice.amount!=null?Number(invoice.amount):''}" placeholder="2500"></label>
+      <label>Due date<input name="dueDate" type="date" value="${esc(invoice.dueDate||isoToday)}" required></label>
+      <label>Status<select name="status">${invoice.transactionId?'<option selected>Paid</option>':`<option ${!invoice.status||invoice.status==='Unpaid'?'selected':''}>Unpaid</option><option ${invoice.status==='Paid'?'selected':''}>Paid</option>`}</select></label>
+      <label class="full">Notes (optional)<textarea name="notes" rows="2" maxlength="500" placeholder="Additional details">${esc(invoice.notes||'')}</textarea></label>
+    </form>`, `<button class="btn btn-secondary" data-close-modal>Cancel</button><button class="btn btn-primary" id="save-invoice">${existing?'Save Changes':'Create Invoice'}</button>`);
+    wrap.querySelector('#save-invoice').onclick=()=>{
+      const form=wrap.querySelector('#invoice-form');
+      if(!form.reportValidity()) return;
+      const o=Object.fromEntries(new FormData(form));
+      const member=data.members.find(m=>String(m.id)===String(o.memberId));
+      const amount=Number(o.amount);
+      if(!member || !Number.isFinite(amount) || amount<=0) return toast('Choose a member and enter a valid amount.','error');
+      if(existing){
+        Object.assign(existing,{memberId:member.id,memberName:member.name,memberPhone:member.phone||'',date:o.date,
+          description:o.description.trim(),category:o.category,amount,dueDate:o.dueDate,status:o.status,notes:o.notes.trim()});
+        if(existing.status==='Paid') {
+          createInvoiceTransaction(existing);
+          const linked=data.transactions.find(t=>String(t.id)===String(existing.transactionId));
+          if(linked){linked.description=`Invoice ${existing.number} — ${existing.memberName}`;linked.member=existing.memberName;linked.amount=existing.amount;linked.date=existing.paidDate||existing.date;linked.category=existing.category||'Membership';}
+        }
+      }else{
+        const item={id:`INV-${Date.now()}`,number:nextInvoiceNumber(),memberId:member.id,memberName:member.name,
+          memberPhone:member.phone||'',date:o.date,description:o.description.trim(),category:o.category,amount,
+          dueDate:o.dueDate,status:o.status,notes:o.notes.trim(),createdAt:new Date().toISOString()};
+        data.invoices.unshift(item);
+        createInvoiceTransaction(item);
+      }
+      save(); wrap.remove(); renderCurrentPage(); toast(existing?'Invoice updated.':'Invoice created.');
+    };
+  }
+  function markInvoicePaid(invoice){
+    if(invoice.status==='Paid') return toast('This invoice is already marked paid.','error');
+    invoice.status='Paid'; invoice.paidDate=isoToday; createInvoiceTransaction(invoice);
+    save(); renderCurrentPage(); toast(`${invoice.number} marked as paid.`);
+  }
+  function deleteInvoice(invoice){
+    const wrap=modal('Delete Invoice',`<p>Delete <strong>${esc(invoice.number)}</strong> for ${esc(invoice.memberName)}? This does not delete any payment transaction already recorded.</p>`,
+      `<button class="btn btn-secondary" data-close-modal>Cancel</button><button class="btn btn-primary" id="confirm-delete-invoice" style="background:#b94b4b;color:#fff">Delete Invoice</button>`);
+    wrap.querySelector('#confirm-delete-invoice').onclick=()=>{
+      data.invoices=data.invoices.filter(i=>i.id!==invoice.id); save(); wrap.remove(); renderCurrentPage(); toast('Invoice deleted.');
+    };
+  }
+  function printInvoice(invoice){
+    const w=window.open('','_blank','width=850,height=700');
+    if(!w) return toast('Please allow pop-ups to print invoices.','error');
+    const escPrint=v=>String(v??'').replace(/[&<>'"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c]));
+    w.document.write(`<!doctype html><html><head><title>${escPrint(invoice.number)}</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>
+      body{font:15px Arial,sans-serif;color:#20242a;max-width:760px;margin:40px auto;padding:0 24px}
+      header{display:flex;justify-content:space-between;gap:20px;border-bottom:2px solid #222;padding-bottom:20px}
+      h1{font-size:28px;margin:0 0 8px}h2{font-size:17px;margin:26px 0 8px}
+      .muted{color:#666;font-size:13px}.number{font-size:20px;font-weight:700}
+      table{width:100%;border-collapse:collapse;margin-top:24px}td,th{padding:14px 10px;border-bottom:1px solid #ddd;text-align:left}
+      th{background:#f4f4f4}.total{text-align:right;font-size:22px;font-weight:700;margin-top:24px}
+      .status{display:inline-block;padding:6px 10px;border:1px solid #bbb;border-radius:5px}
+      @media print{body{margin:0 auto;padding:0 10px}}
+    </style></head><body><header><div><h1>${escPrint(settings.gymName||'TEAM REVOLUTION')}</h1><div class="muted">${escPrint(settings.address||'')}${settings.phone?' · '+escPrint(settings.phone):''}</div></div><div><div class="number">INVOICE</div><div>${escPrint(invoice.number)}</div><div class="muted">Date: ${escPrint(fmtDate(invoice.date))}</div><div class="muted">Due: ${escPrint(fmtDate(invoice.dueDate))}</div></div></header>
+      <h2>Bill To</h2><strong>${escPrint(invoice.memberName)}</strong><div class="muted">${escPrint(invoice.memberPhone||'')}</div>
+      <table><thead><tr><th>Description</th><th>Category</th><th>Amount</th></tr></thead><tbody><tr><td>${escPrint(invoice.description)}</td><td>${escPrint(invoice.category)}</td><td>${escPrint(money(invoice.amount))}</td></tr></tbody></table>
+      <div class="total">Total: ${escPrint(money(invoice.amount))}</div><p><span class="status">${escPrint(invoice.status)}</span></p>
+      ${invoice.notes?`<h2>Notes</h2><p>${escPrint(invoice.notes)}</p>`:''}<p class="muted" style="margin-top:60px">Thank you for choosing ${escPrint(settings.gymName||'TEAM REVOLUTION')}.</p><script>window.onload=()=>window.print();<\/script></body></html>`);
+    w.document.close();
+  }
+  function exportInvoices(){
+    const rows=[['Invoice Number','Date','Due Date','Member','Phone','Description','Category','Amount','Status','Notes'],
+      ...data.invoices.map(i=>[i.number,i.date,i.dueDate,i.memberName,i.memberPhone,i.description,i.category,i.amount,i.status,i.notes])];
+    const csv=rows.map(row=>row.map(v=>`"${String(v??'').replace(/"/g,'""')}"`).join(',')).join('\r\n');
+    const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
+    const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=`team-revolution-invoices-${isoToday}.csv`;a.click();URL.revokeObjectURL(url);
+  }
+  function renderInvoices(){
+    const body=document.querySelector('#invoices-table tbody'); if(!body) return;
+    const search=(document.querySelector('#invoice-search')?.value||'').trim().toLowerCase();
+    const filter=document.querySelector('#invoice-status-filter')?.value||'All';
+    const all=[...data.invoices].sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
+    const visible=all.filter(i=>(filter==='All'||effectiveInvoiceStatus(i)===filter)&&[i.number,i.memberName,i.description,i.category,effectiveInvoiceStatus(i)].some(v=>String(v||'').toLowerCase().includes(search)));
+    body.innerHTML=visible.length?visible.map(i=>`<tr>
+      <td><strong>${esc(i.number)}</strong></td><td>${fmtDate(i.date)}</td><td>${esc(i.memberName)}</td>
+      <td>${esc(i.description)}</td><td>${money(i.amount)}</td><td><span class="badge ${invoiceStatusClass(effectiveInvoiceStatus(i))}">${esc(effectiveInvoiceStatus(i))}</span></td><td>${fmtDate(i.dueDate)}</td>
+      <td class="invoice-actions"><button class="if-mini-btn" data-invoice-print="${esc(i.id)}">Print</button> <button class="if-mini-btn" data-invoice-edit="${esc(i.id)}">Edit</button> ${i.status!=='Paid'?`<button class="if-mini-btn" data-invoice-paid="${esc(i.id)}">Mark Paid</button>`:''} <button class="if-mini-btn" data-invoice-delete="${esc(i.id)}" style="color:#e68181">Delete</button></td></tr>`).join(''):`<tr><td colspan="8"><div class="if-empty">${all.length?'No invoices match your search.':'No invoices yet. Create your first invoice.'}</div></td></tr>`;
+    const total=data.invoices.reduce((n,i)=>n+(Number(i.amount)||0),0);
+    const paid=data.invoices.filter(i=>i.status==='Paid').reduce((n,i)=>n+(Number(i.amount)||0),0);
+    const unpaid=data.invoices.filter(i=>i.status!=='Paid').reduce((n,i)=>n+(Number(i.amount)||0),0);
+    document.querySelector('[data-invoice-total]')?.replaceChildren(document.createTextNode(money(total)));
+    document.querySelector('[data-invoice-paid]')?.replaceChildren(document.createTextNode(money(paid)));
+    document.querySelector('[data-invoice-unpaid]')?.replaceChildren(document.createTextNode(money(unpaid)));
+    document.querySelector('[data-invoice-count]')?.replaceChildren(document.createTextNode(String(data.invoices.length)));
+    body.querySelectorAll('[data-invoice-print]').forEach(b=>b.onclick=()=>{const i=data.invoices.find(x=>x.id===b.dataset.invoicePrint);if(i)printInvoice(i);});
+    body.querySelectorAll('[data-invoice-edit]').forEach(b=>b.onclick=()=>{const i=data.invoices.find(x=>x.id===b.dataset.invoiceEdit);if(i)invoiceModal(i);});
+    body.querySelectorAll('[data-invoice-paid]').forEach(b=>b.onclick=()=>{const i=data.invoices.find(x=>x.id===b.dataset.invoicePaid);if(i)markInvoicePaid(i);});
+    body.querySelectorAll('[data-invoice-delete]').forEach(b=>b.onclick=()=>{const i=data.invoices.find(x=>x.id===b.dataset.invoiceDelete);if(i)deleteInvoice(i);});
+    const searchInput=document.querySelector('#invoice-search');
+    if(searchInput && !searchInput.dataset.bound){searchInput.dataset.bound='1';searchInput.addEventListener('input',renderInvoices);}
+    const statusFilter=document.querySelector('#invoice-status-filter');
+    if(statusFilter && !statusFilter.dataset.bound){statusFilter.dataset.bound='1';statusFilter.addEventListener('change',renderInvoices);}
+  }
+
   function renderCurrentPage(){
     if(page==='members.html')renderMembers();
     if(page==='finance.html')renderFinance();
+    if(page==='invoices.html')renderInvoices();
     if(page==='bookings.html')renderBookings();
     if(page==='attendance.html')renderAttendance();
     if(page==='trainers.html')renderTrainers();

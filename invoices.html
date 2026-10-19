@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Invoices — TEAM REVOLUTION Gym Management</title>
+  <link rel="stylesheet" href="style.css?v=invoices20261019">
+  <script src="firebase-config.js"></script>
+  <style>
+    .invoice-toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:16px 20px;border-bottom:1px solid var(--border)}
+    .invoice-toolbar input,.invoice-toolbar select{min-height:38px;padding:0 12px;border:1px solid var(--border);border-radius:9px;background:#0b1015;color:var(--text);font:inherit;font-size:12px}
+    .invoice-toolbar input{flex:1;min-width:190px}
+    .invoice-toolbar select{min-width:135px}
+    .invoice-actions{white-space:normal;min-width:240px}
+    .invoice-help{margin:0 0 18px;color:var(--muted);font-size:12px;line-height:1.6}
+    .invoice-stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+    @media(max-width:850px){.invoice-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.invoice-actions{min-width:230px}}
+    @media(max-width:520px){.invoice-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.invoice-stats .stat-card{padding:13px;min-height:94px}.invoice-stats .stat-card strong{font-size:19px}.invoice-toolbar{padding:13px}.invoice-toolbar input{min-width:100%;flex-basis:100%}.page-header{align-items:flex-start;flex-direction:column}.page-actions{width:100%;flex-wrap:wrap}}
+  </style>
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <a class="brand tca-brand" href="index.html">
+        <img src="assets/tribal-logo-192.png" alt="Team Revolution" class="tca-logo">
+        <span class="tca-brand-text"><strong><span>TEAM</span><span>REVOLUTION</span><span>MMA</span></strong><small>GYM MANAGEMENT</small></span>
+      </a>
+      <button class="mobile-menu-toggle" type="button" aria-expanded="false" aria-controls="primary-navigation">
+        <span class="mobile-menu-icon" aria-hidden="true">☰</span><span>Menu</span>
+      </button>
+      <nav class="sidebar-nav" id="primary-navigation">
+        <span class="nav-label">MAIN</span>
+        <a href="index.html">Dashboard</a>
+        <a href="members.html">Members</a>
+        <a href="memberships.html">Memberships</a>
+        <a href="attendance.html">Attendance</a>
+        <a href="bookings.html">Bookings</a>
+        <a href="trainers.html">Trainers</a>
+        <a href="finance.html">Income &amp; Expenses</a>
+        <a href="invoices.html" class="active">Invoices</a>
+        <a href="reports.html">Reports</a>
+        <a href="settings.html">Settings</a>
+      </nav>
+      <div class="sidebar-promo"><span>STRONGER</span><strong>Healthier.<br>Happier.</strong></div>
+    </aside>
+    <main class="main-content">
+      <header class="topbar">
+        <div class="search-box"><span>⌕</span><input type="search" placeholder="Search members, bookings, or anything..."></div>
+        <div class="topbar-user"><button class="icon-btn" aria-label="Notifications">♧</button><div class="user-avatar">A</div><div><strong>Admin</strong><small>Gym Owner</small></div><span>⌄</span></div>
+      </header>
+      <div class="content">
+        <section class="page-header">
+          <div><span class="eyebrow">BILLING &amp; PAYMENTS</span><h1>Invoices</h1><p>Create member invoices, track payment status, and print receipts.</p></div>
+          <div class="page-actions"><button class="btn btn-secondary">Export Invoices</button><button class="btn btn-primary">+ Create Invoice</button></div>
+        </section>
+        <p class="invoice-help">Invoices are saved with your gym records. Marking an invoice as paid records its income in the finance ledger. Use Print to print or save an invoice as PDF.</p>
+        <section class="stats-grid invoice-stats">
+          <article class="stat-card"><span>Total Invoiced</span><strong data-invoice-total>₹0</strong><small>All invoices</small></article>
+          <article class="stat-card"><span>Paid</span><strong data-invoice-paid>₹0</strong><small>Collected invoices</small></article>
+          <article class="stat-card"><span>Outstanding</span><strong data-invoice-unpaid>₹0</strong><small>Not yet paid</small></article>
+          <article class="stat-card"><span>Invoice Count</span><strong data-invoice-count>0</strong><small>Invoices created</small></article>
+        </section>
+        <article class="panel table-panel">
+          <div class="panel-heading"><div><span class="eyebrow">BILLING RECORDS</span><h2>All Invoices</h2></div></div>
+          <div class="invoice-toolbar">
+            <input id="invoice-search" type="search" placeholder="Search invoice number, member, or description..." aria-label="Search invoices">
+            <select id="invoice-status-filter" aria-label="Filter invoice status"><option>All</option><option>Paid</option><option>Unpaid</option><option>Overdue</option></select>
+          </div>
+          <div class="table-wrap"><table id="invoices-table">
+            <thead><tr><th>Invoice</th><th>Date</th><th>Member</th><th>Description</th><th>Amount</th><th>Status</th><th>Due Date</th><th>Actions</th></tr></thead>
+            <tbody><tr><td colspan="8"><div class="if-empty">Loading invoices…</div></td></tr></tbody>
+          </table></div>
+        </article>
+      </div>
+    </main>
+  </div>
+  <script src="firebase-connection.js"></script>
+  <script src="auth-gate.js"></script>
+  <script src="script.js?v=invoices20261019"></script>
+</body>
+</html>
