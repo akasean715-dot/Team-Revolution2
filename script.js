@@ -248,7 +248,7 @@ async function loadCloudData() {
   }
 }
   function getSettings() {
-    const defaults = { gymName:'TEAM REVOLUTION', owner:'Admin', email:'admin@gym.com', phone:'+91 98765 43210', hours:'5:00 AM – 10:00 PM', currency:'INR', timezone:'Asia/Kolkata', paymentMethods:['Cash','UPI','Card'], notifications:{expiry:true,payments:true} };
+    const defaults = { gymName:'TEAM REVOLUTION', owner:'Admin', email:'admin@gym.com', phone:'+91 98765 43210', address:'123 Fitness Street', hours:'5:00 AM – 10:00 PM', currency:'INR', timezone:'Asia/Kolkata', paymentMethods:['Cash','UPI','Card'], notifications:{expiry:true,payments:true} };
     try { return { ...defaults, ...(JSON.parse(localStorage.getItem(SETTINGS_KEY)) || {}) }; } catch { return defaults; }
   }
   let settings = getSettings();
@@ -2257,20 +2257,51 @@ setTimeout(() => {
   }
   function toggleBookingView(mode){ bookingView=mode==='list'?'list':'calendar'; renderBookings(); }
 
+  function getSettingsField(labelText){
+    const labels=[...document.querySelectorAll('.settings-content label')];
+    const label=labels.find(item=>item.childNodes[0]?.textContent?.trim().toLowerCase()===labelText.toLowerCase()
+      || item.textContent.trim().toLowerCase().startsWith(labelText.toLowerCase()));
+    return label ? label.querySelector('input, textarea, select') : null;
+  }
+
+  function loadSettingsIntoPage(){
+    if(page!=='settings.html') return;
+    const fields={
+      owner:getSettingsField('Owner Name'),
+      email:getSettingsField('Email'),
+      phone:getSettingsField('Phone'),
+      address:getSettingsField('Address'),
+      hours:getSettingsField('Opening Hours')
+    };
+    Object.entries(fields).forEach(([key,field])=>{
+      if(field && settings[key] !== undefined && settings[key] !== null) field.value=settings[key];
+    });
+    const currency=getSettingsField('Currency');
+    if(currency) currency.value=settings.currency==='USD'?'USD — $':'INR — ₹';
+    const timezone=getSettingsField('Timezone');
+    if(timezone && settings.timezone) timezone.value=settings.timezone;
+  }
+
   function saveSettingsFromPage(){
-    const inputs=[...document.querySelectorAll('.settings-content input')];
-    if(inputs[0]) settings.gymName=inputs[0].value.trim() || 'TEAM REVOLUTION';
-    if(inputs[1]) settings.owner=inputs[1].value.trim() || 'Admin';
-    if(inputs[2]) settings.email=inputs[2].value.trim() || 'admin@gym.com';
-    if(inputs[3]) settings.phone=inputs[3].value.trim() || '+91 98765 43210';
+    const owner=getSettingsField('Owner Name');
+    const email=getSettingsField('Email');
+    const phone=getSettingsField('Phone');
+    const address=getSettingsField('Address');
+    const hours=getSettingsField('Opening Hours');
+    const currency=getSettingsField('Currency');
+    const timezone=getSettingsField('Timezone');
 
-    const selects=[...document.querySelectorAll('.settings-content select')];
-    if(selects[0]) settings.currency=selects[0].value.includes('USD')?'USD':'INR';
-    if(selects[1] && selects[1].value) settings.timezone=selects[1].value;
+    if(owner) settings.owner=owner.value.trim() || 'Admin';
+    if(email) settings.email=email.value.trim() || 'admin@gym.com';
+    if(phone) settings.phone=phone.value.trim() || '+91 98765 43210';
+    if(address) settings.address=address.value.trim();
+    if(hours) settings.hours=hours.value.trim();
+    if(currency) settings.currency=currency.value.includes('USD')?'USD':'INR';
+    if(timezone && timezone.value) settings.timezone=timezone.value;
 
+    // Persist settings in this browser so they survive page refreshes.
     saveSettings();
 
-    // Immediately reflect saved values in the current page/header.
     const ownerName=document.querySelector('.topbar-user strong');
     const avatar=document.querySelector('.topbar-user .user-avatar');
     if(ownerName) ownerName.textContent=settings.owner;
@@ -2381,6 +2412,7 @@ setTimeout(() => {
     setupHeader();
     setupProfilePhoto();
     setupGlobalSearch();
+    loadSettingsIntoPage();
     renderCurrentPage();
 
     document.addEventListener('keydown', e => {
