@@ -49,6 +49,17 @@
         window.firebaseAuth ||
         authSdk.getAuth(app);
 
+      // Keep the owner's sign-in across page navigation and refreshes.
+      // Do this before auth-gate.js subscribes to onAuthStateChanged.
+      try {
+        await authSdk.setPersistence(auth, authSdk.browserLocalPersistence);
+      } catch (persistenceError) {
+        console.warn(
+          '[Team Revolution Firebase] Could not set local auth persistence:',
+          persistenceError
+        );
+      }
+
       const db =
         window.firebaseDB ||
         firestoreSdk.getFirestore(app);

@@ -832,7 +832,18 @@ async function loadCloudData() {
     const width=900,height=300,pad={l:58,r:22,t:22,b:42};
     const innerW=width-pad.l-pad.r, innerH=height-pad.t-pad.b;
     const max=Math.max(1,...points.flatMap(p=>[p.income,p.expense]));
-    const niceMax=Math.ceil(max/1000)*1000 || 1000;
+    // Keep the highest value near the top while leaving a little headroom.
+    // Use a readable scale: for small values, round the ceiling to $250/$500 steps;
+    // for larger values, use 1/2/5 × powers of ten.
+    const targetMax = max * 1.12;
+    let niceMax;
+    if (targetMax <= 2000) {
+      niceMax = Math.ceil(targetMax / 250) * 250;
+    } else {
+      const magnitude = Math.pow(10, Math.floor(Math.log10(targetMax)));
+      const normalized = targetMax / magnitude;
+      niceMax = (normalized <= 1 ? 1 : normalized <= 2 ? 2 : normalized <= 5 ? 5 : 10) * magnitude;
+    }
     const x=i=>points.length===1?pad.l+innerW/2:pad.l+(i/(points.length-1))*innerW;
     const y=v=>pad.t+innerH-(v/niceMax)*innerH;
     const fmt=n=>money(n);
