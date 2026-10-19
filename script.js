@@ -2173,6 +2173,42 @@ setTimeout(() => {
         if (b && values[i] !== undefined) b.textContent = values[i];
       });
     }
+    // Render Recent Activity from this member's real saved records (not sample HTML).
+    const timeline = document.querySelector('.timeline');
+    if (timeline) {
+      const memberName = String(member.name || '').trim().toLowerCase();
+      const memberId = String(member.id || '').trim();
+      const matchesMember = item => {
+        const byId = item.memberId != null && String(item.memberId) === memberId;
+        const byName = String(item.member || item.memberName || '').trim().toLowerCase() === memberName;
+        const description = String(item.description || '').toLowerCase();
+        return byId || byName || (!!memberName && description.includes(memberName));
+      };
+      const events = [];
+      (data.attendance || []).filter(a => matchesMember(a) || String(a.memberId || a.memberID || '') === memberId)
+        .forEach(a => events.push({date:a.date, time:a.checkInAt || '', title:'Checked in for gym session', detail:a.checkIn ? `Check-in ${a.checkIn}` : ''}));
+      (data.transactions || []).filter(matchesMember).forEach(t => {
+        const paid = transactionIsPaid(t);
+        events.push({date:t.date, time:t.createdAt || '', title:`${t.type === 'Expense' ? 'Payment/expense recorded' : (paid ? 'Payment received' : 'Payment recorded')}`, detail:`${money(t.amount)}${t.category ? ` · ${t.category}` : ''}${t.status ? ` · ${t.status}` : ''}`});
+      });
+      (data.invoices || []).filter(i => matchesMember(i) || String(i.memberId || '') === memberId).forEach(i => {
+        events.push({date:i.paidDate || i.date || i.issueDate, time:i.updatedAt || i.createdAt || '', title:String(i.status || '').toLowerCase() === 'paid' ? 'Invoice paid' : 'Invoice created', detail:`${i.invoiceNumber || i.number || i.id || 'Invoice'} · ${money(i.amount)}`});
+      });
+      (data.bookings || []).filter(b => matchesMember(b) || String(b.memberId || '') === memberId).forEach(b => {
+        events.push({date:b.date, time:b.time || '', title:`${b.status === 'Cancelled' ? 'Booking cancelled' : 'Session booking'}`, detail:`${b.type || 'Gym session'}${b.trainer ? ` · ${b.trainer}` : ''}`});
+      });
+      // Membership start is a real member field; do not invent historical renewals.
+      if (member.start) events.push({date:member.start, title:'Membership started / latest start date', detail:member.plan || 'Membership'});
+      const parseEventTime = e => {
+        const d = String(e.date || '');
+        const t = String(e.time || '');
+        const parsed = Date.parse(`${d}T${/^\d{2}:\d{2}/.test(t) ? t.slice(0,5) : '12:00'}:00`);
+        return Number.isFinite(parsed) ? parsed : 0;
+      };
+      events.sort((a,b)=>parseEventTime(b)-parseEventTime(a));
+      const recent = events.slice(0,8);
+      timeline.innerHTML = recent.length ? recent.map(e => `<p><b>${esc(e.date ? fmtDate(e.date) : 'Date unavailable')}</b> ${esc(e.title)}${e.detail ? ` — ${esc(e.detail)}` : ''}</p>`).join('') : '<p>No recorded activity for this member yet.</p>';
+    }
     const edit = document.querySelector('.page-actions .btn-secondary');
     if (edit) edit.onclick = () => memberModal(member);
     const payment = [...document.querySelectorAll('.page-actions button')].find(b => b.textContent.includes('Record Payment'));
